@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FrontierOne — Multi-Account Proposal</title>
+<style>
+  :root {
+    --bg: #F3F4FA;
+    --card: #FFFFFF;
+    --border: #E6E7F0;
+    --border-strong: #D7D9E8;
+    --ink: #16182B;
+    --ink-2: #5B5E77;
+    --ink-3: #8A8CA3;
+    --indigo: #4F3FE0;
+    --indigo-600: #4534C9;
+    --indigo-50: #EFEDFC;
+    --indigo-100: #E1DDFA;
+    --teal: #14B8A6;
+    --amber-bg: #FFF6E5;
+    --amber-text: #92650A;
+    --amber-border: #F3D998;
+    --red-bg: #FDECEC;
+    --red-text: #B42318;
+    --red-border: #F6C4C0;
+    --green-bg: #E9F9EF;
+    --green-text: #157A44;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 2px rgba(20,20,50,0.04), 0 1px 8px rgba(20,20,50,0.04);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+  #app { display: flex; min-height: 100vh; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: 268px; flex-shrink: 0;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 20px 14px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .brand { display:flex; align-items:center; gap:8px; padding: 4px 8px 18px; }
+  .brand-mark { width:20px; height:20px; border:2px solid var(--ink); border-radius:4px; }
+  .brand-name { font-weight:600; font-size:14px; letter-spacing:0.02em; }
+  .nav-item {
+    padding: 9px 10px; border-radius: var(--radius-sm);
+    color: var(--ink-2); font-size: 13.5px; cursor: pointer;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .nav-item:hover { background: #F7F7FC; }
+  .nav-item.active { background: var(--indigo-50); color: var(--indigo); font-weight: 600; }
+  .nav-sub { margin-left: 8px; padding-left: 10px; border-left: 2px solid var(--border); display:flex; flex-direction:column; gap:2px; margin-top:2px; margin-bottom:6px;}
+  .nav-account-row {
+    padding: 7px 8px; border-radius: var(--radius-sm); cursor:pointer;
+    display:flex; align-items:center; justify-content:space-between; gap:6px;
+  }
+  .nav-account-row:hover { background: #F7F7FC; }
+  .nav-account-row.active-acct { background: var(--indigo-50); }
+  .nav-account-row.active-acct .name { color: var(--indigo); }
+  .nav-account-row .name-wrap { min-width:0; flex:1; }
+  .nav-account-row .name { font-size: 12.5px; color: var(--ink); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+  .nav-account-row .num-inline { color: var(--ink-3); font-weight:500; }
+  .side-tag { font-size:9.5px; font-weight:700; padding:2px 6px; border-radius:5px; flex-shrink:0; white-space:nowrap; }
+  .side-tag.not_started { background:#EEEFF5; color: var(--ink-3); }
+  .side-tag.tax_review { background: var(--amber-bg); color: var(--amber-text); }
+  .side-tag.complete { background: var(--green-bg); color: var(--green-text); }
+
+  /* ---------- Main ---------- */
+  .main { flex: 1; min-width:0; display:flex; flex-direction:column; }
+  .topbar {
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 14px 28px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .topbar-fields { display:flex; gap:36px; }
+  .tf-label { font-size:11px; color: var(--ink-3); margin-bottom:2px; }
+  .tf-value { font-size:13.5px; font-weight:600; color: var(--ink); }
+  .topbar-actions { display:flex; gap:8px; align-items:center; }
+  .btn-save-exit {
+    background: var(--indigo-50); color: var(--indigo); border:none; font-weight:600;
+    padding:8px 16px; border-radius: var(--radius-sm); font-size:13px; cursor:pointer;
+  }
+  .btn-reset {
+    background:#fff; color: var(--ink-2); border:1px solid var(--border-strong); font-weight:600;
+    padding:8px 14px; border-radius: var(--radius-sm); font-size:13px; cursor:pointer;
+  }
+  .btn-reset:hover { border-color:#C6392F; color:#C6392F; }
+  .content { padding: 28px 32px 60px; max-width: 1100px; width:100%; }
+
+  h1.page-title { font-size: 22px; margin: 0 0 4px; font-weight:700; }
+  p.page-sub { color: var(--ink-2); margin: 0 0 22px; font-size:13.5px; }
+
+  /* ---------- Cards / Summary ---------- */
+  .summary-row { display:flex; gap:14px; margin-bottom:18px; }
+  .summary-card {
+    background: var(--card); border:1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 18px; flex:1; box-shadow: var(--shadow);
+  }
+  .summary-card .label { font-size:11.5px; color: var(--ink-3); margin-bottom:4px; }
+  .summary-card .val { font-size:20px; font-weight:700; }
+
+  .banner {
+    border-radius: var(--radius); padding: 12px 16px; font-size:13px; margin-bottom:16px;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .banner.amber { background: var(--amber-bg); color: var(--amber-text); border:1px solid var(--amber-border); }
+  .banner.red { background: var(--red-bg); color: var(--red-text); border:1px solid var(--red-border); }
+  .banner.neutral { background:#F7F7FC; color: var(--ink-2); border:1px solid var(--border); }
+  .banner b { font-weight:700; }
+  .banner .fix-link { color: var(--indigo); font-weight:600; cursor:pointer; text-decoration:underline; }
+
+  /* ---------- Table ---------- */
+  .table-card { background: var(--card); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden; }
+  table { width:100%; border-collapse: collapse; }
+  thead th {
+    text-align:left; font-size:11px; color: var(--ink-3); font-weight:600;
+    padding: 12px 16px; border-bottom:1px solid var(--border); background:#FAFAFD;
+  }
+  tbody td { padding: 13px 16px; border-bottom:1px solid var(--border); font-size:13.5px; vertical-align:middle; }
+  tbody tr:last-child td { border-bottom:none; }
+  tbody tr.clickable:hover { background:#FAFAFD; cursor:pointer; }
+  .acct-name { font-weight:600; color: var(--ink); }
+  .acct-num { font-size:11.5px; color: var(--ink-3); margin-top:1px; }
+
+  /* custom checkbox */
+  .chk { width:18px; height:18px; border-radius:5px; border:1.5px solid var(--border-strong); background:#fff;
+    display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+  .chk:hover { border-color: var(--indigo); }
+  .chk.checked { background: var(--indigo); border-color: var(--indigo); color:#fff; font-size:12px; font-weight:700; }
+  .chk.checked::after { content:'\2713'; line-height:1; }
+
+  .pill { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:600; }
+  .pill.taxable { background:#FCEFE6; color:#A15A1C; }
+  .pill.nontaxable { background:#EEF0FB; color:#4B4E75; }
+  .status-pill { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; }
+  .status-pill.not_started { color: var(--ink-3); }
+  .status-pill.tax_review { color: #92650A; }
+  .status-pill.complete { color: #157A44; }
+  .status-pill .dot { width:7px; height:7px; border-radius:50%; }
+  .status-pill.not_started .dot { background: var(--ink-3); }
+  .status-pill.tax_review .dot { background: #E0A314; }
+  .status-pill.complete .dot { background: var(--teal); }
+
+  .icon-btn { border:none; background:none; cursor:pointer; color: var(--ink-3); padding:4px; border-radius:6px; font-size:14px; }
+  .icon-btn:hover { background:#F0F0F8; color: var(--indigo); }
+  .exc-link { color: var(--indigo); font-weight:600; cursor:pointer; font-size:12.5px; }
+
+  .toolbar { display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
+  .toolbar .left-note { font-size:13px; color: var(--ink-2); }
+
+  /* ---------- Buttons ---------- */
+  .btn { border:none; border-radius: var(--radius-sm); padding:10px 18px; font-size:13.5px; font-weight:600; cursor:pointer; }
+  .btn-primary { background: var(--indigo); color:#fff; }
+  .btn-primary:hover { background: var(--indigo-600); }
+  .btn-primary:disabled { background:#C9C9E0; cursor:not-allowed; }
+  .btn-secondary { background:#fff; color: var(--ink); border:1px solid var(--border-strong); }
+  .btn-secondary:hover { background:#FAFAFD; }
+  .btn-ghost { background:none; color: var(--indigo); border:none; font-weight:600; padding:10px 6px; cursor:pointer; }
+  .btn-row { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay {
+    position: fixed; inset:0; background: rgba(20,20,40,0.42);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal {
+    background:#fff; border-radius: var(--radius); width:100%; max-width:640px;
+    max-height:86vh; overflow-y:auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    padding: 26px 28px;
+  }
+  .modal h2 { margin:0 0 6px; font-size:18px; }
+  .modal p.sub { color: var(--ink-2); font-size:13px; margin:0 0 18px; }
+
+  /* ---------- Portfolio picker ---------- */
+  .pill-filter { display:inline-flex; padding:3px 12px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; border:1px solid var(--border-strong); color: var(--ink-2); background:#fff; margin-right:8px; }
+  .pill-filter.active { background: var(--indigo); color:#fff; border-color: var(--indigo); }
+  .portfolio-card {
+    border:1px solid var(--border-strong); border-radius: var(--radius); padding:14px 16px;
+    margin-bottom:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+  }
+  .portfolio-card.selected { border-color: var(--indigo); background: var(--indigo-50); }
+  .portfolio-card .pf-name { font-weight:600; font-size:14px; }
+  .portfolio-card .pf-desc { font-size:12.5px; color: var(--ink-2); margin-top:4px; max-width:380px; }
+  .pf-tag { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color: var(--ink-3); background:#F1F1F8; padding:2px 7px; border-radius:5px; }
+  .pf-radio { width:18px; height:18px; border-radius:50%; border:2px solid var(--border-strong); flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; }
+  .portfolio-card.selected .pf-radio { border-color: var(--indigo); }
+  .portfolio-card.selected .pf-radio::after { content:''; width:9px; height:9px; border-radius:50%; background: var(--indigo); }
+  .details-link { font-size:12px; color: var(--indigo); font-weight:600; cursor:pointer; }
+  .pf-details-box { margin-top:8px; padding:10px 12px; background:#fff; border:1px dashed var(--border-strong); border-radius:8px; font-size:12px; color: var(--ink-2); }
+
+  .disabled-pill { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius: var(--radius-sm); background:#F1F1F8; color: var(--ink-3); font-size:12.5px; font-weight:600; cursor:not-allowed; border:1px solid var(--border); }
+
+  /* ---------- Tabs (per account workspace) ---------- */
+  .acct-header {
+    background: var(--card); border:1px solid var(--border); border-radius: var(--radius);
+    padding:14px 18px; display:flex; gap:34px; margin-bottom:18px; box-shadow: var(--shadow);
+  }
+  .acct-header .field .label { font-size:11px; color: var(--ink-3); }
+  .acct-header .field .val { font-size:13.5px; font-weight:600; margin-top:2px; }
+  .tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:22px; flex-wrap:wrap; }
+  .tab { padding:10px 4px; margin-right:22px; font-size:13.5px; color: var(--ink-2); cursor:pointer; border-bottom:2px solid transparent; font-weight:500; }
+  .tab.active { color: var(--indigo); border-bottom-color: var(--indigo); font-weight:600; }
+
+  .radio-line { display:flex; align-items:center; gap:10px; padding:11px 4px; border-bottom:1px solid var(--border); cursor:pointer; }
+  .radio-line:last-child{ border-bottom:none; }
+  .radio-circle { width:17px; height:17px; border-radius:50%; border:2px solid var(--border-strong); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .radio-line.checked .radio-circle { border-color: var(--indigo); }
+  .radio-line.checked .radio-circle::after { content:''; width:8px; height:8px; border-radius:50%; background:var(--indigo); }
+  .radio-line .rl-label { font-size:13.5px; font-weight:500; }
+
+  .tax-panel { background: var(--indigo-50); border:1px solid var(--indigo-100); border-radius: var(--radius); padding:16px 18px; margin-top:16px; }
+  .tax-panel h4 { margin:0 0 10px; font-size:13px; color: var(--indigo-600); }
+  .tax-row { display:flex; justify-content:space-between; padding:6px 0; font-size:12.5px; border-bottom:1px dashed var(--indigo-100); }
+  .tax-row:last-child { border-bottom:none; }
+  .tax-row .k { color: var(--ink-2); }
+  .tax-row .v { font-weight:700; color: var(--ink); }
+  .custom-input { display:flex; align-items:center; gap:6px; margin-top:8px; margin-left:27px; }
+  .custom-input input { border:1px solid var(--border-strong); border-radius:6px; padding:6px 8px; font-size:13px; width:120px; }
+
+  .empty-note { color: var(--ink-3); font-size:13px; padding: 10px 4px; }
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--border); }
+  .check-item:last-child{ border-bottom:none; }
+
+  .toast {
+    position: fixed; top:18px; right:18px; background:#fff; border:1px solid var(--border);
+    border-left:4px solid var(--teal); border-radius:8px; padding:12px 16px; box-shadow: var(--shadow);
+    font-size:13px; z-index:60; max-width:280px;
+  }
+  .toast b { display:block; margin-bottom:2px; }
+
+  .success-wrap { display:flex; flex-direction:column; align-items:center; text-align:center; padding: 60px 20px; }
+  .success-circle { width:64px; height:64px; border-radius:50%; background: var(--green-bg); display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
+  .success-box { background:#fff; border:1px solid var(--border); border-radius: var(--radius); padding:18px 22px; margin:20px 0; text-align:left; max-width:460px; width:100%; box-shadow: var(--shadow); }
+  .success-box ul { margin:8px 0 0; padding-left:18px; font-size:13px; color: var(--ink-2); }
+  .success-box li { margin-bottom:5px; }
+
+  .assigned-banner { background:#F1EFFD; border:1px solid var(--indigo-100); color: var(--indigo-600); border-radius:8px; padding:9px 12px; font-size:12.5px; margin-bottom:14px; }
+
+  /* ---------- Select Accounts (initial) screen ---------- */
+  .field-block { margin-bottom:16px; max-width:420px; }
+  .field-block label { display:block; font-size:12.5px; font-weight:600; color: var(--ink-2); margin-bottom:6px; }
+  .field-block input, .field-block select { width:100%; padding:10px 12px; border:1px solid var(--border-strong); border-radius: var(--radius-sm); font-size:13.5px; color: var(--ink); background:#fff; }
+  .acct-select-card {
+    border:1px solid var(--border-strong); border-radius: var(--radius); padding:14px 16px; margin-bottom:10px;
+    display:flex; align-items:center; gap:12px; cursor:pointer;
+  }
+  .acct-select-card.checked { border-color: var(--indigo); background: var(--indigo-50); }
+  .acct-select-card .asc-info { flex:1; }
+  .acct-select-card .asc-name { font-weight:600; font-size:13.5px; }
+  .acct-select-card .asc-meta { font-size:11.5px; color: var(--ink-3); margin-top:2px; }
+  .acct-select-card .asc-val { font-weight:700; font-size:14px; }
+
+  /* ---------- Exceptions tab ---------- */
+  .exception-item { display:flex; justify-content:space-between; align-items:center; padding:10px 4px; border-bottom:1px solid var(--border); font-size:13px; }
+  .exception-item:last-child { border-bottom:none; }
+  .exception-remove { color: var(--red-text); cursor:pointer; font-size:12px; font-weight:600; }
+  .add-exception-form { margin-top:14px; padding:14px; background:#FAFAFD; border:1px dashed var(--border-strong); border-radius: var(--radius-sm); }
+  .add-exception-form select, .add-exception-form input { padding:8px 10px; border:1px solid var(--border-strong); border-radius:6px; font-size:13px; margin-right:8px; margin-bottom:8px; }
+
+  /* ---------- Stub page ---------- */
+  .stub-box { background:#fff; border:1px dashed var(--border-strong); border-radius: var(--radius); padding:40px; text-align:center; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------------- DATA ---------------- */
+function freshAccountTemplate(){
+  return [
+    { id:'ira', name:'IRA', type:'Traditional IRA', num:'\u2022\u2022\u2022\u20221234', taxable:false, value:425000, portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] },
+    { id:'roth', name:'Roth IRA', type:'Roth IRA', num:'\u2022\u2022\u2022\u20225678', taxable:false, value:185000, portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] },
+    { id:'brok1', name:'Taxable Brokerage', type:'Individual Brokerage', num:'\u2022\u2022\u2022\u20229012', taxable:true, value:310000, portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] },
+    { id:'401k', name:'401(k)', type:'401(k)', num:'\u2022\u2022\u2022\u20223456', taxable:false, value:520000, portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] },
+    { id:'brok2', name:'Brokerage', type:'Joint Brokerage', num:'\u2022\u2022\u2022\u20227890', taxable:true, value:140000, portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] },
+  ];
+}
+
+const portfolios = [
+  { id:'conservative', name:'Conservative Income', split:'20/80', category:'core', desc:'Designed for capital preservation with modest growth expectations.', ret:'4.2%', risk:'3.1%' },
+  { id:'balanced', name:'Balanced Growth', split:'50/50', category:'core', desc:'Designed for investors seeking moderate growth and capital preservation.', ret:'7.2%', risk:'7.3%' },
+  { id:'growth', name:'Growth', split:'70/30', category:'core', desc:'Designed for long-term capital appreciation with moderate volatility risk.', ret:'8.9%', risk:'10.4%' },
+  { id:'aggressive', name:'Aggressive Growth', split:'90/10', category:'core', desc:'Designed for investors seeking to capture the growth of equity markets.', ret:'10.1%', risk:'14.2%' },
+  { id:'taxsensitive', name:'Tax-Sensitive ETF 20/80', split:'', category:'tax-sensitive', desc:'Optimized for after-tax return in taxable accounts.', ret:'5.1%', risk:'5.6%' },
+  { id:'sowell', name:'Sowell Classic Balanced', split:'', category:'custom', custom:true, desc:'Advisor-saved custom model portfolio.', ret:'8.4%', risk:'10.9%' },
+];
+
+const exceptionTypes = [
+  { id:'no_trade', label:'Do not trade a security' },
+  { id:'reserve', label:'Reserve a cash amount' },
+  { id:'other', label:'Other instruction' },
+];
+
+let accounts = [];
+
+function defaultState(){
+  return {
+    view: 'selectAccounts',      // selectAccounts | overview | activeAccount | review | success | stub
+    selectAccountsChecked: { ira:true, roth:true, brok1:true, '401k':true, brok2:true },
+    proposalName: 'Henderson Family Q3 Rebalance',
+    selectedIds: [],
+    showPortfolioModal: false,
+    showMixedWarning: false,
+    showConflictWarning: false,
+    pendingPortfolioId: 'growth',
+    pillFilter: 'all',
+    detailsOpenId: null,
+    activeAccountId: null,
+    activeTab: 'current',
+    toast: null,
+    conflictAccounts: [],
+    stubLabel: '',
+    excFormType: 'no_trade',
+    excFormValue: '',
+    showResetConfirm: false,
+  };
+}
+let state = defaultState();
+
+/* ---------------- HELPERS ---------------- */
+function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
+function getAccount(id){ return accounts.find(a=>a.id===id); }
+
+function statusOf(a){
+  if(!a.portfolio) return 'not_started';
+  if(a.taxable && !a.taxSetting) return 'tax_review';
+  return 'complete';
+}
+function statusLabel(s){
+  return { not_started:'Not started', tax_review:'Tax review required', complete:'Complete' }[s];
+}
+function sideTagLabel(s){
+  return { not_started:'Incomplete', tax_review:'Needs review', complete:'Complete' }[s];
+}
+function taxPlanLabel(a){
+  if(!a.taxable) return '\u2013';
+  if(!a.taxSetting) return null;
+  const labels = { minimal:'Minimal gains', median:'Median gains', max:'Max gains', custom: 'Custom' + (a.taxCustomAmt ? ' ('+fmt(parseFloat(a.taxCustomAmt)||0)+')' : '') };
+  return labels[a.taxSetting];
+}
+function portfolioName(id){
+  if(!id) return '\u2013';
+  const p = portfolios.find(p=>p.id===id);
+  return p ? (p.name + (p.split ? ' ('+p.split+')' : '')) : id;
+}
+function allResolved(){ return accounts.every(a=>statusOf(a)==='complete'); }
+function completedCount(){ return accounts.filter(a=>statusOf(a)==='complete').length; }
+
+function showToast(title, body){
+  state.toast = {title, body};
+  render();
+  setTimeout(()=>{ state.toast=null; render(); }, 3200);
+}
+
+/* ---------------- RESET ---------------- */
+function askReset(){
+  state.showResetConfirm = true;
+  render();
+}
+function cancelReset(){
+  state.showResetConfirm = false;
+  render();
+}
+function resetPrototype(){
+  accounts = [];
+  state = defaultState();
+  render();
+}
+
+/* ---------------- SELECT ACCOUNTS (initial) ---------------- */
+function toggleSelectAccountsChecked(id){
+  state.selectAccountsChecked[id] = !state.selectAccountsChecked[id];
+  render();
+}
+function continueFromSelectAccounts(){
+  const master = freshAccountTemplate();
+  accounts = master.filter(a => state.selectAccountsChecked[a.id]);
+  if(accounts.length===0) return;
+  state.view = 'overview';
+  render();
+}
+
+/* ---------------- ACTIONS ---------------- */
+function toggleSelect(id){
+  const i = state.selectedIds.indexOf(id);
+  if(i>-1) state.selectedIds.splice(i,1); else state.selectedIds.push(id);
+  render();
+}
+
+function openBulkPortfolioModal(){
+  if(state.selectedIds.length===0) return;
+  const conflicts = state.selectedIds.map(getAccount).filter(a=>a.portfolio && a.source==='individual');
+  if(conflicts.length){
+    state.conflictAccounts = conflicts;
+    state.showConflictWarning = true;
+  } else {
+    state.showPortfolioModal = true;
+  }
+  render();
+}
+
+function proceedPastConflict(exclude){
+  if(exclude){
+    state.conflictAccounts.forEach(a=>{
+      const i = state.selectedIds.indexOf(a.id);
+      if(i>-1) state.selectedIds.splice(i,1);
+    });
+  }
+  state.showConflictWarning = false;
+  if(state.selectedIds.length>0) state.showPortfolioModal = true;
+  render();
+}
+
+function attemptApplyBulk(){
+  const selected = state.selectedIds.map(getAccount);
+  const hasTaxable = selected.some(a=>a.taxable);
+  const hasNonTaxable = selected.some(a=>!a.taxable);
+  if(hasTaxable && hasNonTaxable){
+    state.showMixedWarning = true;
+    render();
+  } else {
+    finalizeBulkApply();
+  }
+}
+
+function finalizeBulkApply(){
+  state.selectedIds.forEach(id=>{
+    const a = getAccount(id);
+    a.portfolio = state.pendingPortfolioId;
+    a.source = 'bulk';
+    a.taxSetting = null;
+  });
+  const n = state.selectedIds.length;
+  state.selectedIds = [];
+  state.showPortfolioModal = false;
+  state.showMixedWarning = false;
+  render();
+  showToast('Portfolio applied', n + ' account' + (n>1?'s':'') + ' updated to ' + portfolioName(state.pendingPortfolioId) + '.');
+}
+
+function cancelMixedWarning(){ state.showMixedWarning = false; render(); }
+
+function openAccount(id, tab){
+  state.activeAccountId = id;
+  state.activeTab = tab || 'current';
+  state.view = 'activeAccount';
+  render();
+}
+function backToOverview(){ state.view='overview'; render(); }
+
+function setIndividualPortfolio(id){
+  const a = getAccount(state.activeAccountId);
+  a.portfolio = id;
+  a.source = 'individual';
+  render();
+}
+function setTaxSetting(val){
+  getAccount(state.activeAccountId).taxSetting = val;
+  render();
+}
+function setCustomAmt(val){
+  getAccount(state.activeAccountId).taxCustomAmt = val;
+  render();
+}
+function toggleFossil(){
+  const a = getAccount(state.activeAccountId);
+  a.restrictions.fossil = !a.restrictions.fossil;
+  render();
+}
+function addException(){
+  const a = getAccount(state.activeAccountId);
+  const t = state.excFormType;
+  const v = state.excFormValue.trim();
+  if(!v) return;
+  let text = '';
+  if(t==='no_trade') text = 'Do not trade: ' + v;
+  else if(t==='reserve') text = 'Reserve ' + fmt(parseFloat(v)||0) + ' \u2014 do not trade';
+  else text = v;
+  a.exceptions.push(text);
+  state.excFormValue = '';
+  render();
+}
+function removeException(idx){
+  getAccount(state.activeAccountId).exceptions.splice(idx,1);
+  render();
+}
+function saveAndReturn(){
+  const a = getAccount(state.activeAccountId);
+  const s = statusOf(a);
+  state.view='overview';
+  render();
+  showToast('Saved', a.name + ' updated \u2014 ' + statusLabel(s) + '.');
+}
+
+function goReview(){ state.view='review'; render(); }
+function generateProposal(){
+  if(!allResolved()) return;
+  state.view='success'; render();
+}
+function openStub(label){ state.stubLabel = label; state.view='stub'; render(); }
+
+/* tax figures: simplified deterministic calc so numbers change per option */
+function taxFigures(a){
+  const base = a.value;
+  const mult = { minimal:0.35, median:0.62, max:0.94, custom: a.taxCustomAmt ? Math.min(1, (parseFloat(a.taxCustomAmt)||0)/ (base*0.03)) : 0.5 }[a.taxSetting] || 0.5;
+  const shortTerm = -(base*0.0107*mult);
+  const longTerm = -(base*0.00047*mult);
+  const realized = shortTerm+longTerm;
+  const taxLiab = realized*0.363;
+  return {
+    shortTerm, longTerm, realized, taxLiab,
+    pctPortfolio: (taxLiab/base*100).toFixed(2)+'%',
+    pctTraded: (40+mult*45).toFixed(2)+'%',
+    pctInModel: (60+mult*38).toFixed(2)+'%',
+    trackingError: (2.1 - mult*1.3).toFixed(2)+'%',
+    years: mult>0.8 ? '~2-3 years' : mult>0.5 ? '~1-2 years' : '~6-12 months',
+  };
+}
+
+/* ---------------- RENDER: SELECT ACCOUNTS ---------------- */
+function renderSelectAccounts(){
+  const master = freshAccountTemplate();
+  const anyChecked = Object.values(state.selectAccountsChecked).some(v=>v);
+  const cards = master.map(a=>{
+    const checked = !!state.selectAccountsChecked[a.id];
+    return `<div class="acct-select-card ${checked?'checked':''}" onclick="toggleSelectAccountsChecked('${a.id}')">
+      <div class="chk ${checked?'checked':''}"></div>
+      <div class="asc-info">
+        <div class="asc-name">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div>
+        <div class="asc-meta">${a.type} \u00b7 ${a.taxable?'Taxable':'Non-taxable'}</div>
+      </div>
+      <div class="asc-val">${fmt(a.value)}</div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="main" style="width:100%;">
+    <div class="topbar">
+      <div class="topbar-fields">
+        <div><div class="tf-label">Client</div><div class="tf-value">Henderson Household</div></div>
+      </div>
+      <div class="topbar-actions"><button class="btn-reset" onclick="askReset()">Reset prototype</button></div>
+    </div>
+    <div class="content">
+      <h1 class="page-title">Define Relationship Context</h1>
+      <p class="page-sub">Set household-level scope and select accounts for this proposal.</p>
+
+      <div class="field-block">
+        <label>Proposal name</label>
+        <input type="text" value="${state.proposalName}" oninput="state.proposalName=this.value">
+      </div>
+      <div class="field-block">
+        <label>Household</label>
+        <select><option>Henderson Household</option></select>
+      </div>
+
+      <div style="font-weight:700; font-size:13.5px; margin:22px 0 10px;">Select accounts</div>
+      ${cards}
+
+      <div class="btn-row">
+        <button class="btn btn-primary" ${anyChecked?'':'disabled'} onclick="continueFromSelectAccounts()">Continue to Configure Accounts</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- RENDER: SIDEBAR ---------------- */
+function renderSidebar(){
+  const accRows = accounts.map(a=>{
+    const s = statusOf(a);
+    const isActive = state.view==='activeAccount' && state.activeAccountId===a.id;
+    return `<div class="nav-account-row ${isActive?'active-acct':''}" onclick="openAccount('${a.id}')">
+      <div class="name-wrap"><span class="name">${a.name} <span class="num-inline">(${a.num})</span></span></div>
+      <span class="side-tag ${s}">${sideTagLabel(s)}</span>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="sidebar">
+    <div class="brand"><div class="brand-mark"></div><div class="brand-name">FRONTIER ONE</div></div>
+    <div class="nav-item" onclick="state.view='selectAccounts';render()">Proposal Setup</div>
+    <div class="nav-item" onclick="openStub('Current Portfolio Overview')">Current Portfolio Overview</div>
+    <div class="nav-item active">Configure Accounts</div>
+    <div class="nav-sub">
+      <div class="nav-account-row ${state.view==='overview'?'active-acct':''}" onclick="backToOverview()" style="font-weight:600;">
+        <span class="name" style="color:${state.view==='overview'?'var(--indigo)':'var(--ink)'}">Acct Progress Overview</span>
+      </div>
+      ${accRows}
+    </div>
+    <div class="nav-item" onclick="openStub('Proposed Portfolio Overview')">Proposed Portfolio Overview</div>
+    <div class="nav-item ${state.view==='review'?'active':''}" onclick="goReview()">Final Review</div>
+    <div class="nav-item" onclick="goReview()">Generate Proposal</div>
+    <div class="nav-item" onclick="openStub('Implement')">Implement</div>
+  </div>`;
+}
+
+function renderTopbar(){
+  return `
+  <div class="topbar">
+    <div class="topbar-fields">
+      <div><div class="tf-label">Proposal ID</div><div class="tf-value">F1P-2026-002301</div></div>
+      <div><div class="tf-label">Client</div><div class="tf-value">Henderson Household</div></div>
+      <div><div class="tf-label">Accounts</div><div class="tf-value">${accounts.length}</div></div>
+      <div><div class="tf-label">Total value</div><div class="tf-value">${fmt(accounts.reduce((s,a)=>s+a.value,0))}</div></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-reset" onclick="askReset()">Reset prototype</button>
+      <button class="btn-save-exit">Save &amp; Exit</button>
+    </div>
+  </div>`;
+}
+
+/* ---------------- RENDER: STUB ---------------- */
+function renderStub(){
+  return `
+    <h1 class="page-title">${state.stubLabel}</h1>
+    <p class="page-sub">This screen hasn't been designed in this prototype yet.</p>
+    <div class="stub-box">
+      <div style="font-weight:600;margin-bottom:6px;">Not yet built</div>
+      <div style="font-size:13px;">${state.stubLabel} still needs a page \u2014 flagged as an open item, not part of this pass.</div>
+    </div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="backToOverview()">Back to Configure Accounts</button></div>
+  `;
+}
+
+/* ---------------- RENDER: OVERVIEW ---------------- */
+function renderOverview(){
+  const nSelected = state.selectedIds.length;
+  const nComplete = completedCount();
+  const rows = accounts.map(a=>{
+    const s = statusOf(a);
+    const checked = state.selectedIds.includes(a.id);
+    const excCell = a.exceptions.length
+      ? `<span class="exc-link" onclick="event.stopPropagation();openAccount('${a.id}','exceptions')">${a.exceptions.length} exception${a.exceptions.length>1?'s':''}</span>`
+      : `<span class="icon-btn" title="Add exception" onclick="event.stopPropagation();openAccount('${a.id}','exceptions')">&#43;</span>`;
+    const planLabel = taxPlanLabel(a);
+    const taxPlanCell = !a.taxable ? '<span style="color:var(--ink-3)">N/A</span>'
+      : planLabel ? planLabel
+      : `<span class="icon-btn" title="Set tax plan" onclick="event.stopPropagation();openAccount('${a.id}','tax')">&#43;</span>`;
+    return `<tr class="clickable" onclick="openAccount('${a.id}')">
+      <td onclick="event.stopPropagation()"><div class="chk ${checked?'checked':''}" onclick="toggleSelect('${a.id}')"></div></td>
+      <td><div class="acct-name">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div><div class="acct-num">${a.type}</div></td>
+      <td><span class="pill ${a.taxable?'taxable':'nontaxable'}">${a.taxable?'Taxable':'Non-taxable'}</span></td>
+      <td>${portfolioName(a.portfolio)}</td>
+      <td>${taxPlanCell}</td>
+      <td>${excCell}</td>
+      <td><span class="status-pill ${s}"><span class="dot"></span>${statusLabel(s)}</span></td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <h1 class="page-title">Account Progress Overview</h1>
+    <p class="page-sub">Select accounts to apply a portfolio in bulk, or click an account to configure it individually.</p>
+
+    <div class="summary-row">
+      <div class="summary-card"><div class="label">Total accounts</div><div class="val">${accounts.length}</div></div>
+      <div class="summary-card"><div class="label">Selected</div><div class="val">${nSelected}</div></div>
+      <div class="summary-card"><div class="label">Complete</div><div class="val">${nComplete} of ${accounts.length}</div></div>
+    </div>
+
+    ${nSelected===0 ? `<div class="banner neutral">No accounts are currently selected for bulk configuration. Select one or more accounts, or click an account name to configure it individually.</div>` : ''}
+
+    <div class="table-card">
+      <table>
+        <thead><tr>
+          <th style="width:36px"></th><th>Account</th><th>Tax status</th><th>Target portfolio</th><th>Tax plan</th><th>Exceptions</th><th>Status</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+
+    <div class="toolbar">
+      <div class="left-note">${nSelected} of ${accounts.length} accounts selected</div>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn btn-primary" ${nSelected? '' : 'disabled'} onclick="openBulkPortfolioModal()">Apply Portfolio to Selected</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goReview()">Continue to Review</button>
+    </div>
+  `;
+}
+
+/* ---------------- RENDER: PORTFOLIO MODAL ---------------- */
+function renderPortfolioModal(){
+  const selected = state.selectedIds.map(getAccount);
+  const totalVal = selected.reduce((s,a)=>s+a.value,0);
+  const filters = [['all','All'],['core','Core'],['tax-sensitive','Tax-Sensitive'],['custom','Custom']];
+  const filterHtml = filters.map(([id,label])=>
+    `<span class="pill-filter ${state.pillFilter===id?'active':''}" onclick="state.pillFilter='${id}';render()">${label}</span>`
+  ).join('');
+
+  const list = portfolios.filter(p=> state.pillFilter==='all' || p.category===state.pillFilter).map(p=>{
+    const sel = state.pendingPortfolioId===p.id;
+    const detailsOpen = state.detailsOpenId===p.id;
+    return `<div class="portfolio-card ${sel?'selected':''}" onclick="state.pendingPortfolioId='${p.id}';render()">
+      <div style="flex:1">
+        <div class="pf-name">${p.name}${p.split? ' ('+p.split+')':''} ${p.custom?'<span class="pf-tag">Custom</span>':''}</div>
+        <div class="pf-desc">${p.desc}</div>
+        <div class="details-link" onclick="event.stopPropagation(); state.detailsOpenId = state.detailsOpenId==='${p.id}'?null:'${p.id}'; render();">${detailsOpen?'Hide details':'View details'}</div>
+        ${detailsOpen ? `<div class="pf-details-box">Expected return: ${p.ret} &nbsp;\u00b7&nbsp; Risk (std. dev): ${p.risk}</div>` : ''}
+      </div>
+      <div class="pf-radio"></div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="modal-overlay">
+    <div class="modal">
+      <h2>Select portfolio for ${selected.length} account${selected.length>1?'s':''}</h2>
+      <p class="sub">Applying portfolio choice to: ${selected.map(a=>a.name).join(', ')}</p>
+      <div style="margin-bottom:14px">${filterHtml}<span class="disabled-pill" style="margin-left:4px" title="Coming soon">Compare portfolios</span></div>
+      <div>${list}</div>
+      <div style="background:#FAFAFD;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:14px;">
+        <div style="font-weight:700;font-size:12.5px;margin-bottom:8px;">Selected accounts allocation target</div>
+        ${selected.map(a=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;"><span>${a.name}</span><span style="font-weight:600">${fmt(a.value)}</span></div>`).join('')}
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0 0;border-top:1px solid var(--border);margin-top:6px;font-weight:700;"><span>Total applied value</span><span>${fmt(totalVal)}</span></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="state.showPortfolioModal=false;render()">Cancel</button>
+        <button class="btn btn-primary" onclick="attemptApplyBulk()">Apply to selected accounts</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- RENDER: MIXED TAX WARNING ---------------- */
+function renderMixedWarning(){
+  const selected = state.selectedIds.map(getAccount);
+  const taxable = selected.filter(a=>a.taxable);
+  const nontax = selected.filter(a=>!a.taxable);
+  return `
+  <div class="modal-overlay">
+    <div class="modal" style="max-width:520px">
+      <h2>Mixed tax status warning</h2>
+      <p class="sub">You're applying the same portfolio to accounts with different tax statuses.</p>
+      <div class="banner amber">
+        <div><b>${taxable.length} of ${selected.length}</b> selected accounts are taxable and will still need individual tax settings reviewed after this is applied. Non-taxable accounts require no further action.</div>
+      </div>
+      <div style="margin-bottom:6px;font-weight:600;font-size:12.5px;">Taxable</div>
+      ${taxable.map(a=>`<div style="font-size:13px;padding:4px 0;">${a.name} \u2014 ${a.num}</div>`).join('') || '<div class="empty-note">None</div>'}
+      <div style="margin:12px 0 6px;font-weight:600;font-size:12.5px;">Non-taxable</div>
+      ${nontax.map(a=>`<div style="font-size:13px;padding:4px 0;">${a.name} \u2014 ${a.num}</div>`).join('') || '<div class="empty-note">None</div>'}
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="cancelMixedWarning()">Go back and adjust selection</button>
+        <button class="btn btn-primary" onclick="finalizeBulkApply()">Proceed</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- RENDER: CONFLICT WARNING ---------------- */
+function renderConflictWarning(){
+  const c = state.conflictAccounts;
+  return `
+  <div class="modal-overlay">
+    <div class="modal" style="max-width:520px">
+      <h2>Potential override conflict</h2>
+      <p class="sub">Some selected accounts already have an individually-assigned portfolio.</p>
+      <div class="banner red">
+        <div>Applying a shared portfolio will overwrite the existing configuration for:
+          <div style="margin-top:6px;font-weight:600;">${c.map(a=>a.name + ' (' + portfolioName(a.portfolio) + ')').join(', ')}</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="proceedPastConflict(true)">Exclude these accounts</button>
+        <button class="btn btn-primary" onclick="proceedPastConflict(false)">Proceed &amp; overwrite</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- RENDER: ACCOUNT WORKSPACE ---------------- */
+function renderAccountWorkspace(){
+  const a = getAccount(state.activeAccountId);
+  let tabs = [['current','Current Portfolio'],['portfolio','Portfolio Selection'],['restrictions','Restrictions'],['exceptions','Exceptions']];
+  if(a.taxable) tabs.push(['tax','Tax Settings']);
+
+  let body = '';
+  if(state.activeTab==='current'){
+    body = `<div class="table-card" style="padding:20px;">
+      <div style="display:flex;gap:40px;">
+        <div><div class="tf-label">Total value</div><div class="tf-value" style="font-size:18px">${fmt(a.value)}</div></div>
+        <div><div class="tf-label">Current model</div><div class="tf-value">Tax-Sensitive ETF 20/80</div></div>
+      </div>
+    </div>`;
+  } else if(state.activeTab==='portfolio'){
+    const bannerHtml = (a.portfolio && a.source==='bulk')
+      ? `<div class="assigned-banner">Assigned via bulk configuration: ${portfolioName(a.portfolio)}. You can override it below for this account only.</div>` : '';
+    const list = portfolios.map(p=>{
+      const checked = a.portfolio===p.id;
+      return `<div class="radio-line ${checked?'checked':''}" onclick="setIndividualPortfolio('${p.id}')">
+        <div class="radio-circle"></div>
+        <div class="rl-label">${p.name}${p.split?' ('+p.split+')':''} ${p.custom?'<span class="pf-tag">Custom</span>':''}</div>
+      </div>`;
+    }).join('');
+    body = `${bannerHtml}<div class="table-card" style="padding:6px 18px;">${list}</div>`;
+  } else if(state.activeTab==='restrictions'){
+    body = `<p class="page-sub" style="margin-bottom:12px;">Screening rules applied to the portfolio model for this account (e.g. sector or issuer exclusions).</p>
+    <div class="table-card" style="padding:14px 18px;">
+      <div class="check-item">
+        <div class="chk ${a.restrictions.fossil?'checked':''}" onclick="toggleFossil()"></div>
+        <span>Restrict fossil-fuel industry tickers</span>
+      </div>
+      <div class="empty-note">No additional screening restrictions available for this account type.</div>
+    </div>`;
+  } else if(state.activeTab==='exceptions'){
+    const list = a.exceptions.map((e,i)=>`<div class="exception-item"><span>${e}</span><span class="exception-remove" onclick="removeException(${i})">Remove</span></div>`).join('');
+    body = `<p class="page-sub" style="margin-bottom:12px;">Account-specific trading exceptions \u2014 e.g. don't trade a particular security, or reserve a dollar amount from this account. Separate from portfolio-level screening restrictions.</p>
+    <div class="table-card" style="padding:6px 18px;">
+      ${list || '<div class="empty-note">No exceptions added for this account.</div>'}
+    </div>
+    <div class="add-exception-form">
+      <select onchange="state.excFormType=this.value;render()">
+        ${exceptionTypes.map(t=>`<option value="${t.id}" ${state.excFormType===t.id?'selected':''}>${t.label}</option>`).join('')}
+      </select>
+      <input type="text" placeholder="${state.excFormType==='no_trade'?'Ticker or security name':state.excFormType==='reserve'?'Amount, e.g. 5000':'Describe the instruction'}" value="${state.excFormValue}" oninput="state.excFormValue=this.value">
+      <button class="btn btn-secondary" onclick="addException()">Add exception</button>
+    </div>`;
+  } else if(state.activeTab==='tax'){
+    const opts = [['minimal','Minimal gains'],['median','Median gains'],['max','Max gains'],['custom','Custom']];
+    const optsHtml = opts.map(([id,label])=>{
+      const checked = a.taxSetting===id;
+      const customField = id==='custom' && checked ? `<div class="custom-input"><span>$</span><input type="text" placeholder="Enter amount" value="${a.taxCustomAmt}" oninput="setCustomAmt(this.value)"></div>` : '';
+      return `<div class="radio-line ${checked?'checked':''}" onclick="setTaxSetting('${id}')"><div class="radio-circle"></div><div class="rl-label">${label}</div></div>${customField}`;
+    }).join('');
+    const fig = a.taxSetting ? taxFigures(a) : null;
+    body = `<div class="table-card" style="padding:6px 18px;">${optsHtml}</div>
+    ${fig ? `<div class="tax-panel">
+      <h4>Realized gain and tax</h4>
+      <div class="tax-row"><span class="k">Short term gain</span><span class="v">${fmt(fig.shortTerm)}</span></div>
+      <div class="tax-row"><span class="k">Long term gain</span><span class="v">${fmt(fig.longTerm)}</span></div>
+      <div class="tax-row"><span class="k">Realized gains</span><span class="v">${fmt(fig.realized)}</span></div>
+      <div class="tax-row"><span class="k">Estimated tax liability</span><span class="v">${fmt(fig.taxLiab)}</span></div>
+      <div class="tax-row"><span class="k">Tax liability % of portfolio value</span><span class="v">${fig.pctPortfolio}</span></div>
+      <div class="tax-row"><span class="k">% portfolio value traded</span><span class="v">${fig.pctTraded}</span></div>
+      <div class="tax-row"><span class="k">% in-model value</span><span class="v">${fig.pctInModel}</span></div>
+      <div class="tax-row"><span class="k">Tracking error</span><span class="v">${fig.trackingError}</span></div>
+      <div class="tax-row"><span class="k">Estimated years to complete</span><span class="v">${fig.years}</span></div>
+    </div>` : `<div class="empty-note">Select a gains option to see the realized gain and tax impact.</div>`}
+    `;
+  }
+
+  return `
+    <div class="acct-header">
+      <div class="field"><div class="label">Account</div><div class="val">${a.name}</div></div>
+      <div class="field"><div class="label">Type</div><div class="val">${a.type}</div></div>
+      <div class="field"><div class="label">Account #</div><div class="val">${a.num}</div></div>
+      <div class="field"><div class="label">Tax status</div><div class="val">${a.taxable?'Taxable':'Non-taxable'}</div></div>
+      <div class="field"><div class="label">Value</div><div class="val">${fmt(a.value)}</div></div>
+    </div>
+    <div class="tabs">
+      ${tabs.map(([id,label])=>`<div class="tab ${state.activeTab===id?'active':''}" onclick="state.activeTab='${id}';render()">${label}</div>`).join('')}
+    </div>
+    ${body}
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="backToOverview()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAndReturn()">Save &amp; return to overview</button>
+    </div>
+  `;
+}
+
+/* ---------------- RENDER: REVIEW ---------------- */
+function renderReview(){
+  const resolved = allResolved();
+  const rows = accounts.map(a=>{
+    const s = statusOf(a);
+    const flagged = s!=='complete';
+    const excCell = a.exceptions.length
+      ? `<span class="exc-link" onclick="event.stopPropagation();openAccount('${a.id}','exceptions')">${a.exceptions.length} exception${a.exceptions.length>1?'s':''}</span>`
+      : '\u2013';
+    const planLabel = taxPlanLabel(a);
+    const taxPlanCell = !a.taxable ? '<span style="color:var(--ink-3)">N/A</span>' : (planLabel || '<span style="color:var(--red-text);font-weight:600;">Not set</span>');
+    return `<tr class="clickable" onclick="openAccount('${a.id}')" style="${flagged?'background:#FFFBF2':''}">
+      <td><div class="acct-name">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div><div class="acct-num">${a.type}</div></td>
+      <td><span class="pill ${a.taxable?'taxable':'nontaxable'}">${a.taxable?'Taxable':'Non-taxable'}</span></td>
+      <td>${portfolioName(a.portfolio)}</td>
+      <td>${taxPlanCell}</td>
+      <td>${excCell}</td>
+      <td>${flagged? `<span class="fix-link" onclick="event.stopPropagation();openAccount('${a.id}','${!a.portfolio ? 'portfolio' : 'tax'}')">Fix issue</span>` : '\u2013'}</td>
+      <td><span class="status-pill ${s}"><span class="dot"></span>${statusLabel(s)}</span></td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <h1 class="page-title">Proposal Review</h1>
+    <p class="page-sub">Verify all configuration metrics. Unresolved items are highlighted below.</p>
+    ${!resolved ? `<div class="banner red">Generation is blocked until every account has a target portfolio and every taxable account has completed tax settings.</div>` : `<div class="banner neutral" style="background:var(--green-bg);color:var(--green-text);border-color:#CDEBD8">All accounts are complete. Tax settings are saved where applicable. Ready to generate trade directives and final documentation.</div>`}
+    <div class="table-card">
+      <table>
+        <thead><tr><th>Account</th><th>Tax status</th><th>Target portfolio</th><th>Tax plan</th><th>Exceptions</th><th>Issue</th><th>Status</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="backToOverview()">Back to configuration</button>
+      <button class="btn btn-primary" ${resolved?'':'disabled'} onclick="generateProposal()">Generate Proposal</button>
+    </div>
+  `;
+}
+
+/* ---------------- RENDER: SUCCESS ---------------- */
+function renderSuccess(){
+  const bulkGroups = {};
+  accounts.forEach(a=>{
+    if(a.source==='bulk'){
+      bulkGroups[a.portfolio] = bulkGroups[a.portfolio] || [];
+      bulkGroups[a.portfolio].push(a.name);
+    }
+  });
+  const indiv = accounts.filter(a=>a.source==='individual');
+  return `
+  <div class="success-wrap">
+    <div class="success-circle" style="font-size:28px;color:var(--green-text);">&#10003;</div>
+    <h1 class="page-title">Proposal Generated Successfully</h1>
+    <p class="page-sub">Henderson Household \u2014 F1P-2026-002301</p>
+    <div class="success-box">
+      <div style="font-weight:700;font-size:12px;letter-spacing:0.02em;color:var(--ink-3);margin-bottom:6px;">ALLOCATION SUMMARY</div>
+      <ul>
+        ${Object.keys(bulkGroups).map(pid=>`<li>Bulk ${portfolioName(pid)} \u2192 ${bulkGroups[pid].join(', ')}</li>`).join('')}
+        ${indiv.map(a=>`<li>Individual ${portfolioName(a.portfolio)} \u2192 ${a.name}</li>`).join('')}
+      </ul>
+    </div>
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn btn-secondary" onclick="resetPrototype()">Start over</button>
+      <button class="btn btn-primary" onclick="backToOverview()">Return to dashboard</button>
+    </div>
+  </div>`;
+}
+
+/* ---------------- ROOT RENDER ---------------- */
+function renderResetConfirm(){
+  return `
+  <div class="modal-overlay">
+    <div class="modal" style="max-width:420px">
+      <h2>Reset prototype?</h2>
+      <p class="sub">This clears every account, portfolio assignment, tax setting, and exception, and returns you to the account-selection screen.</p>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="cancelReset()">Cancel</button>
+        <button class="btn btn-primary" style="background:#C6392F" onclick="resetPrototype()">Reset prototype</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function render(){
+  if(state.view==='selectAccounts'){
+    const resetOverlay = state.showResetConfirm ? renderResetConfirm() : '';
+    document.getElementById('app').innerHTML = renderSelectAccounts() + (state.toast? `<div class="toast"><b>${state.toast.title}</b>${state.toast.body}</div>` : '') + resetOverlay;
+    return;
+  }
+
+  let contentHtml = '';
+  if(state.view==='overview') contentHtml = renderOverview();
+  else if(state.view==='activeAccount') contentHtml = renderAccountWorkspace();
+  else if(state.view==='review') contentHtml = renderReview();
+  else if(state.view==='success') contentHtml = renderSuccess();
+  else if(state.view==='stub') contentHtml = renderStub();
+
+  let overlays = '';
+  if(state.showPortfolioModal) overlays += renderPortfolioModal();
+  if(state.showMixedWarning) overlays += renderMixedWarning();
+  if(state.showConflictWarning) overlays += renderConflictWarning();
+  if(state.showResetConfirm) overlays += renderResetConfirm();
+  if(state.toast) overlays += `<div class="toast"><b>${state.toast.title}</b>${state.toast.body}</div>`;
+
+  document.getElementById('app').innerHTML = `
+    ${renderSidebar()}
+    <div class="main">
+      ${renderTopbar()}
+      <div class="content">${contentHtml}</div>
+    </div>
+    ${overlays}
+  `;
+}
+
+render();
+</script>
+</body>
+</html>

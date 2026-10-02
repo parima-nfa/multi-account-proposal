@@ -4,38 +4,100 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FrontierOne — Multi-Account Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #F3F4FA;
-    --card: #FFFFFF;
-    --border: #E6E7F0;
-    --border-strong: #D7D9E8;
-    --ink: #16182B;
-    --ink-2: #5B5E77;
-    --ink-3: #8A8CA3;
-    --indigo: #4F3FE0;
-    --indigo-600: #4534C9;
-    --indigo-50: #EFEDFC;
-    --indigo-100: #E1DDFA;
-    --teal: #14B8A6;
-    --amber-bg: #FFF6E5;
-    --amber-text: #92650A;
-    --amber-border: #F3D998;
-    --red-bg: #FDECEC;
-    --red-text: #B42318;
-    --red-border: #F6C4C0;
-    --green-bg: #E9F9EF;
-    --green-text: #157A44;
+    box-sizing: border-box;
+    /* NFA core primitives — light */
+    --canvas:#F2F3F6; --surface:#FFFFFF; --subtle:#E2E4E9; --inverse:#1B1C20;
+    --t-primary:#23242A; --t-secondary:#5D616A; --t-disabled:#8B8F97; --t-link:#3D3CD3;
+    --b-default:#C4C7CE; --b-subtle:#E2E4E9; --b-focus:#4C57E9;
+    --brand:#4C57E9; --brand-hover:#3D3CD3; --brand-active:#272695; --brand-subtle:#CDDBFF; --brand-onsubtle:#3D3CD3;
+    --success-d:#10B981; --success-bg:#ECFDF3; --success-tx:#047857;
+    --danger-d:#B91C1C; --danger-bg:#FEF2F2; --danger-tx:#B91C1C;
+    --warning-d:#B45309; --warning-bg:#FFFBEB; --warning-tx:#92400E;
+    --warning-tint: color-mix(in srgb, var(--warning-d) 16%, var(--surface));
+    --danger-tint:  color-mix(in srgb, var(--danger-d) 16%, var(--surface));
+    --success-tint: color-mix(in srgb, var(--success-d) 16%, var(--surface));
+    --warning-tint-canvas: color-mix(in srgb, var(--warning-d) 16%, var(--canvas));
+    --danger-tint-canvas:  color-mix(in srgb, var(--danger-d) 16%, var(--canvas));
+    --success-tint-canvas: color-mix(in srgb, var(--success-d) 16%, var(--canvas));
+    --t-onbrand:#FFFFFF;
+    --chart-fixed:#3D3CD3; --chart-us:#0C97B6; --chart-intl:#9E2DCF; --chart-alts:#6E8CF7; --chart-cash:#8B8F97;
+    --tn-bg:#CDDBFF; --tn-lbl:#3D3CD3; --tn-press:#A4B8FF; --tn-hover:#B9CAFF; --tn-hover-lbl:#3D3CD3;
+    color-scheme: light;
+
+    /* aliases used throughout this file — map to the primitives above */
+    --bg: var(--canvas);
+    --card: var(--surface);
+    --border: var(--b-subtle);
+    --border-strong: var(--b-default);
+    --ink: var(--t-primary);
+    --ink-2: var(--t-secondary);
+    --ink-3: var(--t-disabled);
+    --indigo: var(--brand);
+    --indigo-600: var(--brand-hover);
+    --indigo-50: var(--brand-subtle);
+    --indigo-100: var(--brand-subtle);
+    --teal: var(--success-d);
+    --amber-bg: var(--warning-bg);
+    --amber-text: var(--warning-tx);
+    --amber-border: var(--warning-d);
+    --red-bg: var(--danger-bg);
+    --red-text: var(--danger-tx);
+    --red-border: var(--danger-d);
+    --green-bg: var(--success-bg);
+    --green-text: var(--success-tx);
     --radius: 12px;
     --radius-sm: 8px;
     --shadow: 0 1px 2px rgba(20,20,50,0.04), 0 1px 8px rgba(20,20,50,0.04);
   }
+  :root[data-theme="dark"] {
+    --canvas:#1B1C20; --surface:#23242A; --subtle:#2C2E35; --inverse:#FFFFFF;
+    --t-primary:#F2F3F6; --t-secondary:#8B8F97; --t-disabled:#5D616A; --t-link:#6E8CF7;
+    --b-default:#3A3D45; --b-subtle:#2C2E35; --b-focus:#6E8CF7;
+    --brand:#4C57E9; --brand-hover:#3D3CD3; --brand-active:#272695; --brand-subtle:#111057; --brand-onsubtle:#8AA3FC;
+    --success-d:#10B981; --success-bg:#047857; --success-tx:#D1FAE5;
+    --danger-d:#F87171; --danger-bg:#B91C1C; --danger-tx:#FEE2E2;
+    --warning-d:#F59E0B; --warning-bg:#B45309; --warning-tx:#FEF3C7;
+    --warning-tint: color-mix(in srgb, var(--warning-d) 12%, var(--surface));
+    --danger-tint:  color-mix(in srgb, var(--danger-d) 12%, var(--surface));
+    --success-tint: color-mix(in srgb, var(--success-d) 12%, var(--surface));
+    --warning-tint-canvas: color-mix(in srgb, var(--warning-d) 12%, var(--canvas));
+    --danger-tint-canvas:  color-mix(in srgb, var(--danger-d) 12%, var(--canvas));
+    --success-tint-canvas: color-mix(in srgb, var(--success-d) 12%, var(--canvas));
+    --t-onbrand:#FFFFFF; --chart-fixed:#6E8CF7; --chart-us:#2ACFE1; --chart-intl:#CC73F5; --chart-alts:#A4B8FF; --chart-cash:#8B8F97; --tn-bg:rgba(138,163,252,.16); --tn-lbl:#A4B8FF; --tn-press:rgba(138,163,252,.24); --tn-hover:rgba(138,163,252,.20); --tn-hover-lbl:#A4B8FF;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --canvas:#1B1C20; --surface:#23242A; --subtle:#2C2E35; --inverse:#FFFFFF;
+      --t-primary:#F2F3F6; --t-secondary:#8B8F97; --t-disabled:#5D616A; --t-link:#6E8CF7;
+      --b-default:#3A3D45; --b-subtle:#2C2E35; --b-focus:#6E8CF7;
+      --brand:#4C57E9; --brand-hover:#3D3CD3; --brand-active:#272695; --brand-subtle:#111057; --brand-onsubtle:#8AA3FC;
+      --success-d:#10B981; --success-bg:#047857; --success-tx:#D1FAE5;
+      --danger-d:#F87171; --danger-bg:#B91C1C; --danger-tx:#FEE2E2;
+      --warning-d:#F59E0B; --warning-bg:#B45309; --warning-tx:#FEF3C7;
+      --warning-tint: color-mix(in srgb, var(--warning-d) 12%, var(--surface));
+      --danger-tint:  color-mix(in srgb, var(--danger-d) 12%, var(--surface));
+      --success-tint: color-mix(in srgb, var(--success-d) 12%, var(--surface));
+      --warning-tint-canvas: color-mix(in srgb, var(--warning-d) 12%, var(--canvas));
+      --danger-tint-canvas:  color-mix(in srgb, var(--danger-d) 12%, var(--canvas));
+      --success-tint-canvas: color-mix(in srgb, var(--success-d) 12%, var(--canvas));
+      --t-onbrand:#FFFFFF; --chart-fixed:#6E8CF7; --chart-us:#2ACFE1; --chart-intl:#CC73F5; --chart-alts:#A4B8FF; --chart-cash:#8B8F97; --tn-bg:rgba(138,163,252,.16); --tn-lbl:#A4B8FF; --tn-press:rgba(138,163,252,.24); --tn-hover:rgba(138,163,252,.20); --tn-hover-lbl:#A4B8FF;
+      color-scheme: dark;
+    }
+  }
+  html { transition: background .2s, color .2s; }
+  * { transition: background-color .15s, border-color .15s, color .15s; }
   * { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0;
     background: var(--bg);
     color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+    font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
   }
@@ -48,7 +110,23 @@
     border-right: 1px solid var(--border);
     padding: 20px 14px;
     display: flex; flex-direction: column; gap: 2px;
+    min-height: 100vh;
   }
+  .sidebar-spacer { flex: 1; }
+  .theme-toggle {
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding: 10px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong);
+    margin-top: 12px; background: var(--surface); cursor:pointer;
+  }
+  .theme-toggle:hover { background: var(--subtle); }
+  .theme-toggle .tt-label { font-size:12.5px; font-weight:600; color: var(--ink-2); display:flex; align-items:center; gap:8px; }
+  .tt-switch { width:34px; height:20px; border-radius:999px; background: var(--t-secondary); position:relative; flex-shrink:0; }
+  .tt-switch.on { background: var(--brand); }
+  .tt-switch::after {
+    content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+    background: var(--surface); transition: left .15s;
+  }
+  .tt-switch.on::after { left:16px; }
   .brand { display:flex; align-items:center; gap:8px; padding: 4px 8px 18px; }
   .brand-mark { width:20px; height:20px; border:2px solid var(--ink); border-radius:4px; }
   .brand-name { font-weight:600; font-size:14px; letter-spacing:0.02em; }
@@ -57,23 +135,35 @@
     color: var(--ink-2); font-size: 13.5px; cursor: pointer;
     display:flex; align-items:center; justify-content:space-between;
   }
-  .nav-item:hover { background: #F7F7FC; }
-  .nav-item.active { background: var(--indigo-50); color: var(--indigo); font-weight: 600; }
+  .nav-item:hover { background: var(--subtle); }
+  .nav-item.active { background: var(--tn-bg); color: var(--tn-lbl); font-weight: 600; }
   .nav-sub { margin-left: 8px; padding-left: 10px; border-left: 2px solid var(--border); display:flex; flex-direction:column; gap:2px; margin-top:2px; margin-bottom:6px;}
   .nav-account-row {
     padding: 7px 8px; border-radius: var(--radius-sm); cursor:pointer;
     display:flex; align-items:center; justify-content:space-between; gap:6px;
   }
-  .nav-account-row:hover { background: #F7F7FC; }
-  .nav-account-row.active-acct { background: var(--indigo-50); }
-  .nav-account-row.active-acct .name { color: var(--indigo); }
+  .nav-account-row:hover { background: var(--subtle); }
+  .nav-account-row.active-acct { background: var(--tn-bg); }
+  .nav-account-row.active-acct .name { color: var(--tn-lbl); }
   .nav-account-row .name-wrap { min-width:0; flex:1; }
   .nav-account-row .name { font-size: 12.5px; color: var(--ink); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
   .nav-account-row .num-inline { color: var(--ink-3); font-weight:500; }
   .side-tag { font-size:9.5px; font-weight:700; padding:2px 6px; border-radius:5px; flex-shrink:0; white-space:nowrap; }
-  .side-tag.not_started { background:#EEEFF5; color: var(--ink-3); }
-  .side-tag.tax_review { background: var(--amber-bg); color: var(--amber-text); }
-  .side-tag.complete { background: var(--green-bg); color: var(--green-text); }
+  .side-tag.not_started { background: var(--subtle); color: var(--t-disabled); }
+  .side-tag.tax_review { background: var(--warning-tint); color: var(--amber-text); }
+  .side-tag.complete { background: var(--success-tint); color: var(--green-text); }
+
+  /* ---------- Sidebar stepper ---------- */
+  .step-item { padding:10px 10px; border-radius: var(--radius-sm); display:flex; align-items:center; gap:9px; color: var(--ink-2); font-size:13.5px; }
+  .step-item.clickable { cursor:pointer; }
+  .step-item.clickable:hover { background: var(--subtle); }
+  .step-item[aria-disabled="true"] { color: var(--t-disabled); cursor:not-allowed; }
+  .step-item.current { background: var(--tn-bg); color: var(--tn-lbl); font-weight:600; }
+  .step-num { width:18px; height:18px; border-radius:50%; border:1.5px solid currentColor; display:flex; align-items:center; justify-content:center; font-size:9.5px; flex-shrink:0; font-weight:700; }
+  .step-check { color: var(--success-tx); font-size:14px; flex-shrink:0; width:18px; text-align:center; }
+  .step-sub { font-size:11.5px; color: var(--t-secondary); margin-top:2px; font-weight:400; }
+  .step-body { flex:1; min-width:0; }
+  .step-row-head { display:flex; align-items:center; justify-content:space-between; gap:6px; }
 
   /* ---------- Main ---------- */
   .main { flex: 1; min-width:0; display:flex; flex-direction:column; }
@@ -86,15 +176,15 @@
   .tf-value { font-size:13.5px; font-weight:600; color: var(--ink); }
   .topbar-actions { display:flex; gap:8px; align-items:center; }
   .btn-save-exit {
-    background: var(--indigo-50); color: var(--indigo); border:none; font-weight:600;
+    background: var(--tn-bg); color: var(--tn-lbl); border:none; font-weight:600;
     padding:8px 16px; border-radius: var(--radius-sm); font-size:13px; cursor:pointer;
   }
   .btn-reset {
-    background:#fff; color: var(--ink-2); border:1px solid var(--border-strong); font-weight:600;
+    background: transparent; color: var(--t-secondary); border:1px solid var(--t-secondary); font-weight:600;
     padding:8px 14px; border-radius: var(--radius-sm); font-size:13px; cursor:pointer;
   }
-  .btn-reset:hover { border-color:#C6392F; color:#C6392F; }
-  .content { padding: 28px 32px 60px; max-width: 1100px; width:100%; }
+  .btn-reset:hover { border-color: var(--danger-d); color: var(--danger-d); }
+  .content { padding: 28px 32px 60px; max-width: 1180px; width:100%; margin: 0 auto; }
 
   h1.page-title { font-size: 22px; margin: 0 0 4px; font-weight:700; }
   p.page-sub { color: var(--ink-2); margin: 0 0 22px; font-size:13.5px; }
@@ -112,59 +202,82 @@
     border-radius: var(--radius); padding: 12px 16px; font-size:13px; margin-bottom:16px;
     display:flex; gap:10px; align-items:flex-start;
   }
-  .banner.amber { background: var(--amber-bg); color: var(--amber-text); border:1px solid var(--amber-border); }
-  .banner.red { background: var(--red-bg); color: var(--red-text); border:1px solid var(--red-border); }
-  .banner.neutral { background:#F7F7FC; color: var(--ink-2); border:1px solid var(--border); }
+  .banner.amber { background: var(--warning-tint); color: var(--amber-text); border:1px solid var(--amber-border); }
+  .banner.red { background: var(--danger-tint); color: var(--red-text); border:1px solid var(--red-border); }
+  .banner.neutral { background: var(--subtle); color: var(--ink-2); border:1px solid var(--border); }
+  .banner.tonal { background: var(--tn-bg); color: var(--tn-lbl); border:1px solid var(--tn-bg); border-left:4px solid var(--brand); font-size:14px; }
+  .banner.tonal b { color: var(--tn-lbl); }
+  .banner.prompt { background: var(--warning-tint); color: var(--warning-tx); border:1px solid var(--warning-d); border-left:4px solid var(--warning-d); font-size:14px; display:flex; align-items:flex-start; gap:10px; }
+  .banner.prompt b { color: var(--warning-tx); }
+  .banner-icon { flex-shrink:0; width:22px; height:22px; margin-top:1px; }
   .banner b { font-weight:700; }
-  .banner .fix-link { color: var(--indigo); font-weight:600; cursor:pointer; text-decoration:underline; }
+  .banner .fix-link { color: var(--t-link); font-weight:600; cursor:pointer; text-decoration:underline; }
 
   /* ---------- Table ---------- */
   .table-card { background: var(--card); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden; }
   table { width:100%; border-collapse: collapse; }
   thead th {
-    text-align:left; font-size:11px; color: var(--ink-3); font-weight:600;
-    padding: 12px 16px; border-bottom:1px solid var(--border); background:#FAFAFD;
+    text-align:left; font-size:11px; color: var(--t-secondary); font-weight:700;
+    text-transform: uppercase; letter-spacing:0.5px;
+    padding: 13px 13px; border-bottom:1px solid var(--b-subtle); background: var(--subtle);
   }
-  tbody td { padding: 13px 16px; border-bottom:1px solid var(--border); font-size:13.5px; vertical-align:middle; }
+  .th-sort { cursor:pointer; display:inline-flex; align-items:center; gap:5px; user-select:none; }
+  .th-sort:hover { color: var(--t-link); }
+  .sort-arrows { display:inline-flex; flex-direction:column; line-height:0.55; font-size:8px; letter-spacing:0; }
+  .sort-arrows span { color: var(--t-secondary); }
+  .sort-arrows span.active { color: var(--t-link); }
+  tbody td { padding: 13px 13px; border-bottom:1px solid var(--border); font-size:13.5px; vertical-align:middle; }
   tbody tr:last-child td { border-bottom:none; }
-  tbody tr.clickable:hover { background:#FAFAFD; cursor:pointer; }
+  tbody tr.clickable:hover { background: var(--tn-bg); cursor:pointer; }
   .acct-name { font-weight:600; color: var(--ink); }
+  .acct-name:hover { color: var(--t-link); text-decoration: underline; text-underline-offset: 3px; cursor:pointer; }
   .acct-num { font-size:11.5px; color: var(--ink-3); margin-top:1px; }
 
   /* custom checkbox */
-  .chk { width:18px; height:18px; border-radius:5px; border:1.5px solid var(--border-strong); background:#fff;
+  .chk { width:18px; height:18px; border-radius:5px; border:1.5px solid var(--border-strong); background: var(--surface);
     display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
-  .chk:hover { border-color: var(--indigo); }
-  .chk.checked { background: var(--indigo); border-color: var(--indigo); color:#fff; font-size:12px; font-weight:700; }
+  .chk:hover { border-color: var(--t-link); }
+  .chk.checked { background: var(--brand); border-color: var(--brand); color: var(--t-onbrand,#fff); font-size:12px; font-weight:700; }
   .chk.checked::after { content:'\2713'; line-height:1; }
+  .chk.indeterminate { background: var(--brand); border-color: var(--brand); color: var(--t-onbrand,#fff); }
+  .chk.indeterminate::after { content:''; width:8px; height:2px; background: var(--t-onbrand,#fff); border-radius:1px; }
 
   .pill { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:600; }
-  .pill.taxable { background:#FCEFE6; color:#A15A1C; }
-  .pill.nontaxable { background:#EEF0FB; color:#4B4E75; }
-  .status-pill { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; }
-  .status-pill.not_started { color: var(--ink-3); }
-  .status-pill.tax_review { color: #92650A; }
-  .status-pill.complete { color: #157A44; }
+  .pill.taxable { background: var(--warning-tint); color: var(--warning-tx); }
+  .pill.deferred { background: var(--subtle); color: var(--ink-2); }
+  .pill.free { background: var(--success-tint); color: var(--success-tx); }
+  .pill.nontaxable { background: var(--subtle); color: var(--t-secondary); }
+  .status-pill { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; padding:3px 10px; border-radius:999px; }
+  .status-pill.not_started { color: var(--ink-3); background:none; padding:0; }
+  .status-pill.tax_review { color: var(--warning-tx); background: var(--warning-tint); }
+  .status-pill.complete { color: var(--success-tx); background: var(--success-tint); }
   .status-pill .dot { width:7px; height:7px; border-radius:50%; }
   .status-pill.not_started .dot { background: var(--ink-3); }
-  .status-pill.tax_review .dot { background: #E0A314; }
+  .status-pill.tax_review .dot { background: var(--warning-d); }
   .status-pill.complete .dot { background: var(--teal); }
 
   .icon-btn { border:none; background:none; cursor:pointer; color: var(--ink-3); padding:4px; border-radius:6px; font-size:14px; }
-  .icon-btn:hover { background:#F0F0F8; color: var(--indigo); }
-  .exc-link { color: var(--indigo); font-weight:600; cursor:pointer; font-size:12.5px; }
+  .icon-btn:hover { background: var(--subtle); color: var(--t-link); }
+  .exc-link { color: var(--t-link); font-weight:600; cursor:pointer; font-size:12.5px; }
+  .add-link { color: var(--t-link); font-weight:600; cursor:pointer; font-size:13px; }
+  .add-link:hover { text-decoration: underline; }
 
   .toolbar { display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
   .toolbar .left-note { font-size:13px; color: var(--ink-2); }
 
   /* ---------- Buttons ---------- */
   .btn { border:none; border-radius: var(--radius-sm); padding:10px 18px; font-size:13.5px; font-weight:600; cursor:pointer; }
-  .btn-primary { background: var(--indigo); color:#fff; }
+  .btn-primary { background: var(--brand); color: var(--t-onbrand,#fff); }
   .btn-primary:hover { background: var(--indigo-600); }
-  .btn-primary:disabled { background:#C9C9E0; cursor:not-allowed; }
-  .btn-secondary { background:#fff; color: var(--ink); border:1px solid var(--border-strong); }
-  .btn-secondary:hover { background:#FAFAFD; }
-  .btn-ghost { background:none; color: var(--indigo); border:none; font-weight:600; padding:10px 6px; cursor:pointer; }
+  .btn-primary:disabled { opacity:.38; cursor:not-allowed; }
+  .btn-primary:active:not(:disabled) { background: var(--brand-active); }
+  .btn-secondary { background: transparent; color: var(--t-secondary); border:1px solid var(--t-secondary); }
+  .btn-secondary:disabled { opacity:.38; cursor:not-allowed; }
+  .btn-secondary:hover:not(:disabled) { background: var(--subtle); color: var(--t-primary); }
+  .btn-secondary:active:not(:disabled) { background: var(--b-default); color: var(--t-primary); }
+  .btn-save-exit:hover { background: var(--tn-hover); color: var(--tn-hover-lbl); }
+  .btn-save-exit:active { background: var(--tn-press); }
+  .btn-ghost { background:none; color: var(--t-link); border:none; font-weight:600; padding:10px 6px; cursor:pointer; }
   .btn-row { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
 
   /* ---------- Modal ---------- */
@@ -173,7 +286,7 @@
     display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;
   }
   .modal {
-    background:#fff; border-radius: var(--radius); width:100%; max-width:640px;
+    background: var(--surface); border-radius: var(--radius); width:100%; max-width:640px;
     max-height:86vh; overflow-y:auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
     padding: 26px 28px;
   }
@@ -181,23 +294,113 @@
   .modal p.sub { color: var(--ink-2); font-size:13px; margin:0 0 18px; }
 
   /* ---------- Portfolio picker ---------- */
-  .pill-filter { display:inline-flex; padding:3px 12px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; border:1px solid var(--border-strong); color: var(--ink-2); background:#fff; margin-right:8px; }
-  .pill-filter.active { background: var(--indigo); color:#fff; border-color: var(--indigo); }
+  .pill-filter { display:inline-flex; padding:3px 12px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; border:1px solid var(--border-strong); color: var(--ink-2); background: var(--surface); margin-right:8px; }
+  .pill-filter.active { background: var(--brand); color: var(--t-onbrand,#fff); border-color: var(--brand); }
+  .portfolio-grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; align-items:stretch; }
+  @media (max-width: 720px) { .portfolio-grid { grid-template-columns: 1fr; } }
   .portfolio-card {
+    background: var(--surface);
     border:1px solid var(--border-strong); border-radius: var(--radius); padding:14px 16px;
-    margin-bottom:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+    cursor:pointer; display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
   }
-  .portfolio-card.selected { border-color: var(--indigo); background: var(--indigo-50); }
+  .portfolio-card.selected { border-color: var(--brand-onsubtle); background: var(--tn-bg); }
   .portfolio-card .pf-name { font-weight:600; font-size:14px; }
-  .portfolio-card .pf-desc { font-size:12.5px; color: var(--ink-2); margin-top:4px; max-width:380px; }
-  .pf-tag { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color: var(--ink-3); background:#F1F1F8; padding:2px 7px; border-radius:5px; }
-  .pf-radio { width:18px; height:18px; border-radius:50%; border:2px solid var(--border-strong); flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; }
-  .portfolio-card.selected .pf-radio { border-color: var(--indigo); }
-  .portfolio-card.selected .pf-radio::after { content:''; width:9px; height:9px; border-radius:50%; background: var(--indigo); }
-  .details-link { font-size:12px; color: var(--indigo); font-weight:600; cursor:pointer; }
-  .pf-details-box { margin-top:8px; padding:10px 12px; background:#fff; border:1px dashed var(--border-strong); border-radius:8px; font-size:12px; color: var(--ink-2); }
+  .pf-subtitle { font-size:12px; color: var(--ink-2); margin-top:3px; font-weight:500; }
+  .portfolio-card .pf-desc { font-size:12.5px; color: var(--ink-2); margin-top:6px; }
+  .details-link { font-size:12px; color: var(--t-link); font-weight:600; cursor:pointer; margin-top:8px; display:inline-block; }
+  .cat-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+  .cat-icon.cat-global-core { background: var(--tn-bg); color: var(--tn-lbl); }
+  .cat-icon.cat-tax-sensitive { background: var(--success-tint); color: var(--success-tx); }
+  .cat-icon.cat-core-alts { background: var(--warning-tint); color: var(--warning-tx); }
+  .cat-icon.cat-us-core { background: var(--subtle); color: var(--ink-2); }
+  .cat-icon.cat-multi-asset { background: var(--tn-bg); color: var(--tn-lbl); }
+  .cat-icon.cat-custom { background: var(--subtle); color: var(--ink-2); }
+  .cat-icon-inline { width:18px; height:18px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; vertical-align:middle; margin-right:5px; }
 
-  .disabled-pill { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius: var(--radius-sm); background:#F1F1F8; color: var(--ink-3); font-size:12.5px; font-weight:600; cursor:not-allowed; border:1px solid var(--border); }
+  /* Details panel (non-modal right drawer) */
+  .details-panel {
+    position: fixed; top:0; right:0; bottom:0; width:380px; max-width:92vw;
+    background: var(--canvas); border-left:1px solid var(--border); box-shadow: -8px 0 24px rgba(0,0,0,0.12);
+    z-index:55; display:flex; flex-direction:column;
+  }
+  .details-panel-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:18px 20px; background: var(--surface); border-bottom:1px solid var(--border-strong); }
+  .details-panel-body { padding:18px 20px; overflow-y:auto; flex:1; }
+  .dp-card { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding:4px 16px; margin-bottom:20px; }
+  .dp-section-title { font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:0.03em; color: var(--ink-3); margin-bottom:8px; }
+  .dp-desc { font-size:13px; color: var(--ink-2); margin: 0 0 10px; line-height:1.5; }
+  .dp-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-strong); font-size:13px; }
+  .dp-row:last-child { border-bottom:none; }
+  .dp-k { color: var(--ink-2); }
+  .dp-v { font-weight:600; color: var(--ink); }
+  .pf-tag { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color: var(--ink-3); background: var(--subtle); padding:2px 7px; border-radius:5px; }
+  .pf-radio { width:18px; height:18px; border-radius:50%; border:2px solid var(--border-strong); flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; }
+  .portfolio-card.selected .pf-radio { border-color: var(--brand-onsubtle); }
+  .portfolio-card.selected .pf-radio::after { content:''; width:9px; height:9px; border-radius:50%; background: var(--brand-onsubtle); }
+
+  /* Special instructions */
+  .si-table { width:100%; border-collapse:collapse; }
+  .si-table td { padding:11px 4px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:top; }
+  .si-table tr:last-child td { border-bottom:none; }
+  .si-label { font-weight:600; width:200px; color: var(--ink); }
+  .si-value { color: var(--ink-2); }
+  .si-value.has-value { color: var(--ink); }
+  .si-edit-link { color: var(--t-link); font-weight:600; cursor:pointer; font-size:12px; margin-left:10px; }
+  .si-edit-input { border:1px solid var(--border-strong); border-radius:6px; padding:6px 8px; font-size:13px; width:100%; max-width:360px; }
+  .si-section-title { font-weight:700; font-size:13px; margin: 4px 0 10px; color: var(--ink); }
+  .si-sub { font-size:12.5px; color: var(--ink-2); margin-bottom:10px; }
+
+  /* Current Portfolio Overview */
+  .alloc-bar { display:flex; height:14px; border-radius:7px; overflow:hidden; width:100%; gap:2px; background: var(--surface); }
+  .alloc-legend { display:flex; gap:16px; margin-top:10px; flex-wrap:wrap; }
+  .alloc-legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color: var(--ink-2); }
+  .alloc-swatch { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+  .holdings-table { width:100%; border-collapse:collapse; margin-top:10px; }
+  .holdings-table th { text-align:left; font-size:10.5px; color: var(--ink-3); text-transform:uppercase; letter-spacing:.03em; padding:6px 4px; border-bottom:1px solid var(--border); }
+  .holdings-table td { padding:8px 4px; font-size:12.5px; border-bottom:1px solid var(--border); }
+  .holdings-table tr:last-child td { border-bottom:none; }
+  .acct-collapse { background: var(--card); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom:12px; overflow:hidden; }
+  .acct-collapse-head { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; cursor:pointer; }
+  .acct-collapse-head:hover { background: var(--subtle); }
+  .acct-collapse-body { padding: 0 18px 18px; border-top:1px solid var(--border); padding-top:16px; }
+  .chevron { transition: transform .15s; color: var(--ink-3); display:inline-block; }
+  .chevron.open { transform: rotate(90deg); }
+
+  .disabled-pill { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius: var(--radius-sm); background: var(--subtle); color: var(--ink-3); font-size:12.5px; font-weight:600; cursor:not-allowed; border:1px solid var(--border); }
+
+  /* Sticky selection bar (Account Progress Overview) */
+  .selection-bar {
+    position: sticky; top:0; z-index:5; min-height:48px; padding:10px 16px; border-radius:8px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap;
+    background: var(--tn-bg); color: var(--tn-lbl);
+  }
+  .selection-bar.empty { background: var(--subtle); color: var(--t-secondary); }
+  .selection-bar .sb-text b { color: var(--tn-lbl); }
+  .selection-bar.empty .sb-text { color: var(--t-secondary); }
+
+  /* Progress line + bar (item 17) */
+  .progress-line { font-size:13px; color: var(--t-secondary); margin: -10px 0 16px; }
+  .progress-track { width:100%; max-width:320px; height:4px; border-radius:2px; background: var(--subtle); margin-top:6px; overflow:hidden; }
+  .progress-fill { height:100%; background: var(--brand); border-radius:2px; }
+
+  /* Split-ratio bar icon on portfolio cards (item 13) */
+  .split-bar-wrap { display:flex; align-items:center; gap:7px; flex-shrink:0; }
+  .split-bar { display:flex; width:40px; height:6px; border-radius:3px; overflow:hidden; gap:1px; }
+  .split-bar .eq { background: var(--brand); }
+  .split-bar .fx { background: var(--brand-subtle); }
+  .split-label { font-size:11.5px; color: var(--t-secondary); white-space:nowrap; }
+
+  /* Prototype chip (item 18) */
+  .prototype-chip {
+    position: fixed; bottom:16px; right:16px; z-index:40; padding:7px 12px; border-radius:6px;
+    font-size:12px; color: var(--t-secondary); background: var(--surface); border:1px dashed var(--t-secondary);
+    cursor:pointer; box-shadow: var(--shadow);
+  }
+  .prototype-menu {
+    position: fixed; bottom:52px; right:16px; z-index:41; background: var(--surface); border:1px solid var(--border-strong);
+    border-radius:8px; box-shadow: var(--shadow); padding:6px; min-width:160px;
+  }
+  .prototype-menu-item { padding:9px 10px; border-radius:6px; font-size:13px; cursor:pointer; color: var(--ink); }
+  .prototype-menu-item:hover { background: var(--subtle); }
 
   /* ---------- Tabs (per account workspace) ---------- */
   .acct-header {
@@ -208,18 +411,18 @@
   .acct-header .field .val { font-size:13.5px; font-weight:600; margin-top:2px; }
   .tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:22px; flex-wrap:wrap; }
   .tab { padding:10px 4px; margin-right:22px; font-size:13.5px; color: var(--ink-2); cursor:pointer; border-bottom:2px solid transparent; font-weight:500; }
-  .tab.active { color: var(--indigo); border-bottom-color: var(--indigo); font-weight:600; }
+  .tab.active { color: var(--t-link); border-bottom-color: var(--t-link); font-weight:600; }
 
   .radio-line { display:flex; align-items:center; gap:10px; padding:11px 4px; border-bottom:1px solid var(--border); cursor:pointer; }
   .radio-line:last-child{ border-bottom:none; }
   .radio-circle { width:17px; height:17px; border-radius:50%; border:2px solid var(--border-strong); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-  .radio-line.checked .radio-circle { border-color: var(--indigo); }
-  .radio-line.checked .radio-circle::after { content:''; width:8px; height:8px; border-radius:50%; background:var(--indigo); }
+  .radio-line.checked .radio-circle { border-color: var(--brand-onsubtle); }
+  .radio-line.checked .radio-circle::after { content:''; width:8px; height:8px; border-radius:50%; background:var(--brand-onsubtle); }
   .radio-line .rl-label { font-size:13.5px; font-weight:500; }
 
-  .tax-panel { background: var(--indigo-50); border:1px solid var(--indigo-100); border-radius: var(--radius); padding:16px 18px; margin-top:16px; }
-  .tax-panel h4 { margin:0 0 10px; font-size:13px; color: var(--indigo-600); }
-  .tax-row { display:flex; justify-content:space-between; padding:6px 0; font-size:12.5px; border-bottom:1px dashed var(--indigo-100); }
+  .tax-panel { background: var(--tn-bg); border:1px solid var(--tn-bg); border-radius: var(--radius); padding:16px 18px; margin-top:16px; }
+  .tax-panel h4 { margin:0 0 10px; font-size:13px; color: var(--tn-lbl); }
+  .tax-row { display:flex; justify-content:space-between; padding:6px 0; font-size:12.5px; border-bottom:1px dashed var(--border); }
   .tax-row:last-child { border-bottom:none; }
   .tax-row .k { color: var(--ink-2); }
   .tax-row .v { font-weight:700; color: var(--ink); }
@@ -230,30 +433,51 @@
   .check-item { display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--border); }
   .check-item:last-child{ border-bottom:none; }
 
+  /* History */
+  .history-item { display:flex; align-items:center; gap:16px; padding:13px 4px; border-bottom:1px solid var(--border); }
+  .history-item:last-child { border-bottom:none; }
+  .history-item.muted { opacity: 0.68; }
+  .hist-type { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color: var(--ink-3); width:110px; flex-shrink:0; }
+  .hist-setting { font-size:13.5px; font-weight:600; color: var(--ink); flex:1; min-width:0; }
+  .hist-dates { font-size:12px; color: var(--ink-2); flex-shrink:0; }
+  .hist-state-pill { font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; flex-shrink:0; white-space:nowrap; }
+  .hist-state-pill.current { background: var(--success-tint); color: var(--success-tx); }
+  .hist-state-pill.replaced, .hist-state-pill.lifted { background: var(--subtle); color: var(--ink-3); }
+
   .toast {
-    position: fixed; top:18px; right:18px; background:#fff; border:1px solid var(--border);
+    position: fixed; top:18px; right:18px; background: var(--surface); border:1px solid var(--border);
     border-left:4px solid var(--teal); border-radius:8px; padding:12px 16px; box-shadow: var(--shadow);
     font-size:13px; z-index:60; max-width:280px;
   }
   .toast b { display:block; margin-bottom:2px; }
 
   .success-wrap { display:flex; flex-direction:column; align-items:center; text-align:center; padding: 60px 20px; }
-  .success-circle { width:64px; height:64px; border-radius:50%; background: var(--green-bg); display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
-  .success-box { background:#fff; border:1px solid var(--border); border-radius: var(--radius); padding:18px 22px; margin:20px 0; text-align:left; max-width:460px; width:100%; box-shadow: var(--shadow); }
+  .success-circle { width:64px; height:64px; border-radius:50%; background: var(--success-tint-canvas); display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
+  .success-box { background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:18px 22px; margin:20px 0; text-align:left; max-width:460px; width:100%; box-shadow: var(--shadow); }
   .success-box ul { margin:8px 0 0; padding-left:18px; font-size:13px; color: var(--ink-2); }
   .success-box li { margin-bottom:5px; }
 
-  .assigned-banner { background:#F1EFFD; border:1px solid var(--indigo-100); color: var(--indigo-600); border-radius:8px; padding:9px 12px; font-size:12.5px; margin-bottom:14px; }
+  .assigned-banner { background: var(--tn-bg); border:1px solid var(--tn-bg); color: var(--tn-lbl); border-radius:8px; padding:9px 12px; font-size:12.5px; margin-bottom:14px; }
 
   /* ---------- Select Accounts (initial) screen ---------- */
   .field-block { margin-bottom:16px; max-width:420px; }
   .field-block label { display:block; font-size:12.5px; font-weight:600; color: var(--ink-2); margin-bottom:6px; }
-  .field-block input, .field-block select { width:100%; padding:10px 12px; border:1px solid var(--border-strong); border-radius: var(--radius-sm); font-size:13.5px; color: var(--ink); background:#fff; }
+  .field-block input, .field-block select { width:100%; padding:10px 12px; border:1px solid var(--border-strong); border-radius: var(--radius-sm); font-size:13.5px; color: var(--ink); background: var(--surface); }
+  .styled-select-wrap { position:relative; max-width:420px; }
+  .styled-select {
+    width:100%; height:40px; padding:0 36px 0 12px; border:1px solid var(--b-default); border-radius:6px;
+    font-size:13.5px; color: var(--ink); background: var(--surface); appearance:none; -webkit-appearance:none; cursor:pointer;
+  }
+  .styled-select:focus { outline:none; border-color: var(--b-focus); box-shadow: 0 0 0 1px var(--b-focus); }
+  .styled-select-wrap::after {
+    content:''; position:absolute; right:12px; top:50%; width:10px; height:10px; pointer-events:none;
+    transform: translateY(-65%) rotate(45deg); border-right:2px solid var(--t-secondary); border-bottom:2px solid var(--t-secondary);
+  }
   .acct-select-card {
     border:1px solid var(--border-strong); border-radius: var(--radius); padding:14px 16px; margin-bottom:10px;
     display:flex; align-items:center; gap:12px; cursor:pointer;
   }
-  .acct-select-card.checked { border-color: var(--indigo); background: var(--indigo-50); }
+  .acct-select-card.checked { border-color: var(--brand-onsubtle); background: var(--tn-bg); }
   .acct-select-card .asc-info { flex:1; }
   .acct-select-card .asc-name { font-weight:600; font-size:13.5px; }
   .acct-select-card .asc-meta { font-size:11.5px; color: var(--ink-3); margin-top:2px; }
@@ -263,11 +487,11 @@
   .exception-item { display:flex; justify-content:space-between; align-items:center; padding:10px 4px; border-bottom:1px solid var(--border); font-size:13px; }
   .exception-item:last-child { border-bottom:none; }
   .exception-remove { color: var(--red-text); cursor:pointer; font-size:12px; font-weight:600; }
-  .add-exception-form { margin-top:14px; padding:14px; background:#FAFAFD; border:1px dashed var(--border-strong); border-radius: var(--radius-sm); }
+  .add-exception-form { margin-top:14px; padding:14px; background: var(--subtle); border:1px dashed var(--border-strong); border-radius: var(--radius-sm); }
   .add-exception-form select, .add-exception-form input { padding:8px 10px; border:1px solid var(--border-strong); border-radius:6px; font-size:13px; margin-right:8px; margin-bottom:8px; }
 
   /* ---------- Stub page ---------- */
-  .stub-box { background:#fff; border:1px dashed var(--border-strong); border-radius: var(--radius); padding:40px; text-align:center; color: var(--ink-2); }
+  .stub-box { background: var(--surface); border:1px dashed var(--border-strong); border-radius: var(--radius); padding:40px; text-align:center; color: var(--ink-2); }
 </style>
 </head>
 <body>
@@ -275,24 +499,172 @@
 
 <script>
 /* ---------------- DATA ---------------- */
-function freshAccountTemplate(){
-  return [
-    { id:'ira', name:'IRA', type:'Traditional IRA', num:'\u2022\u2022\u2022\u20221234', taxable:false, value:425000, portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] },
-    { id:'roth', name:'Roth IRA', type:'Roth IRA', num:'\u2022\u2022\u2022\u20225678', taxable:false, value:185000, portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] },
-    { id:'brok1', name:'Taxable Brokerage', type:'Individual Brokerage', num:'\u2022\u2022\u2022\u20229012', taxable:true, value:310000, portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] },
-    { id:'401k', name:'401(k)', type:'401(k)', num:'\u2022\u2022\u2022\u20223456', taxable:false, value:520000, portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] },
-    { id:'brok2', name:'Brokerage', type:'Joint Brokerage', num:'\u2022\u2022\u2022\u20227890', taxable:true, value:140000, portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] },
-  ];
+function defaultExtras(value, taxable){
+  const alloc = taxable
+    ? { fixedIncome:55, usEquity:30, intlEquity:10, cash:5 }
+    : { fixedIncome:25, usEquity:55, intlEquity:15, cash:5 };
+  const fixedTicker = taxable ? ['AGG','iShares Core US Aggregate Bond'] : ['BND','Vanguard Total Bond Market'];
+  const holdings = [
+    [fixedTicker[0], fixedTicker[1], Math.round(value*alloc.fixedIncome/100), alloc.fixedIncome],
+    ['VTI','Vanguard Total Stock Market', Math.round(value*alloc.usEquity/100), alloc.usEquity],
+    ['VXUS','Vanguard Total International', Math.round(value*alloc.intlEquity/100), alloc.intlEquity],
+    ['Cash','Cash & Equivalents', Math.round(value*alloc.cash/100), alloc.cash],
+  ].filter(h=>h[3]>0);
+  return {
+    special:{ tradingHold:'None', cashReserve:'None', securityRestrictions:'None', recurringWithdrawals:'None' },
+    allocation: alloc,
+    holdings,
+    history:[],
+  };
+}
+
+const HOUSEHOLDS = {
+  carter: { label:'Carter Household', accounts:[
+    { id:'c1', name:'IRA', type:'Traditional IRA', num:'\u2022\u2022\u2022\u20224410', taxStatus:'deferred', value:210000, ...defaultExtras(210000,false) },
+    { id:'c2', name:'Roth IRA', type:'Roth IRA', num:'\u2022\u2022\u2022\u20224411', taxStatus:'free', value:95000, ...defaultExtras(95000,false) },
+    { id:'c3', name:'Brokerage', type:'Individual Brokerage', num:'\u2022\u2022\u2022\u20224412', taxStatus:'taxable', value:180000, ...defaultExtras(180000,true),
+      special:{ tradingHold:'None', cashReserve:'None', securityRestrictions:'Do not trade tobacco or firearms industry securities', recurringWithdrawals:'None' } },
+  ]},
+  henderson: { label:'Henderson Household', accounts:[
+    { id:'ira', name:'IRA', type:'Traditional IRA', num:'\u2022\u2022\u2022\u20221234', taxStatus:'deferred', value:425000,
+      special:{ tradingHold:'None', cashReserve:'None', securityRestrictions:'None', recurringWithdrawals:'None' },
+      allocation:{ fixedIncome:35, usEquity:45, intlEquity:15, cash:5 },
+      holdings:[ ['VTI','Vanguard Total Stock', 191250, 45.0], ['BND','Vanguard Total Bond', 148750, 35.0], ['VXUS','Vanguard International', 63750, 15.0], ['Cash','Cash & Equivalents', 21250, 5.0] ],
+      history:[
+        { type:'portfolio', setting:'Conservative Income (20/80)', applied:'Sep 30, 2026', state:'current' },
+        { type:'portfolio', setting:'Growth (70/30)', applied:'Sep 18, 2026', state:'replaced', endDate:'Sep 30, 2026' },
+        { type:'special', setting:'Do not sell AAPL below 100 shares', applied:'Aug 12, 2026', state:'lifted', endDate:'Sep 20, 2026' },
+      ] },
+    { id:'roth', name:'Roth IRA', type:'Roth IRA', num:'\u2022\u2022\u2022\u20225678', taxStatus:'free', value:185000,
+      special:{ tradingHold:'None', cashReserve:'None', securityRestrictions:'None', recurringWithdrawals:'None' },
+      allocation:{ fixedIncome:20, usEquity:60, intlEquity:15, cash:5 },
+      holdings:[ ['VTI','Vanguard Total Stock', 111000, 60.0], ['VXUS','Vanguard International', 27750, 15.0], ['BND','Vanguard Total Bond', 37000, 20.0], ['Cash','Cash & Equivalents', 9250, 5.0] ],
+      history:[
+        { type:'portfolio', setting:'Balanced Growth (50/50)', applied:'Sep 15, 2026', state:'current' },
+      ] },
+    { id:'brok1', name:'Taxable Brokerage', type:'Individual Brokerage', num:'\u2022\u2022\u2022\u20229012', taxStatus:'taxable', value:310000,
+      special:{ tradingHold:'None', cashReserve:'None', securityRestrictions:'None', recurringWithdrawals:'3 active withdrawals ($750/mo equivalent)' },
+      allocation:{ fixedIncome:76.4, usEquity:15.8, intlEquity:5.3, cash:2.5 },
+      holdings:[ ['MUB','iShares National Muni Bond', 39220, 12.8], ['TAXX','Bondbloxx IR+M Tax-Aware', 36890, 11.9], ['TFLO','iShares Treasury Floating', 35030, 11.3], ['Cash','Cash & Equivalents', 7750, 2.5] ],
+      history:[
+        { type:'tax', setting:'Custom \u2014 $5,000 maximum realized gains', applied:'Sep 30, 2026', state:'current' },
+        { type:'tax', setting:'Minimal Gains', applied:'Sep 18, 2026', state:'replaced', endDate:'Sep 30, 2026' },
+        { type:'portfolio', setting:'Tax-Sensitive ETF 20/80', applied:'Sep 10, 2026', state:'current' },
+      ] },
+    { id:'401k', name:'401(k)', type:'401(k)', num:'\u2022\u2022\u2022\u20223456', taxStatus:'deferred', value:520000,
+      special:{ tradingHold:'None', cashReserve:'None', securityRestrictions:'None', recurringWithdrawals:'None' },
+      allocation:{ fixedIncome:15, usEquity:65, intlEquity:15, cash:5 },
+      holdings:[ ['TDF2050','Target Date 2050 Fund', 520000, 100.0] ],
+      history:[
+        { type:'portfolio', setting:'Aggressive Growth (90/10)', applied:'Sep 5, 2026', state:'current' },
+      ] },
+    { id:'brok2', name:'Brokerage', type:'Joint Brokerage', num:'\u2022\u2022\u2022\u20227890', taxStatus:'taxable', value:140000,
+      special:{ tradingHold:'Preserve positions \u2014 core holdings (cash included)', cashReserve:'Min cash: $5,000 + 2% buffer', securityRestrictions:'None', recurringWithdrawals:'None' },
+      allocation:{ fixedIncome:30, usEquity:50, intlEquity:15, cash:5 },
+      holdings:[ ['VTI','Vanguard Total Stock', 70000, 50.0], ['BND','Vanguard Total Bond', 42000, 30.0], ['VXUS','Vanguard International', 21000, 15.0], ['Cash','Cash & Equivalents', 7000, 5.0] ],
+      history:[
+        { type:'special', setting:'Reserve $10,000 cash', applied:'Sep 25, 2026', state:'current' },
+        { type:'portfolio', setting:'Growth (70/30)', applied:'Sep 12, 2026', state:'current' },
+      ] },
+  ]},
+  martinez: { label:'Martinez Household', accounts:[
+    { id:'m1', name:'IRA', type:'Traditional IRA', num:'\u2022\u2022\u2022\u20225501', taxStatus:'deferred', value:340000, ...defaultExtras(340000,false) },
+    { id:'m2', name:'Roth IRA', type:'Roth IRA', num:'\u2022\u2022\u2022\u20225502', taxStatus:'free', value:120000, ...defaultExtras(120000,false) },
+    { id:'m3', name:'401(k)', type:'401(k)', num:'\u2022\u2022\u2022\u20225503', taxStatus:'deferred', value:410000, ...defaultExtras(410000,false) },
+    { id:'m4', name:'SEP IRA', type:'SEP IRA', num:'\u2022\u2022\u2022\u20225504', taxStatus:'deferred', value:150000, ...defaultExtras(150000,false) },
+    { id:'m5', name:'Individual Brokerage', type:'Individual Brokerage', num:'\u2022\u2022\u2022\u20225505', taxStatus:'taxable', value:260000, ...defaultExtras(260000,true) },
+    { id:'m6', name:'Joint Brokerage', type:'Joint Brokerage', num:'\u2022\u2022\u2022\u20225506', taxStatus:'taxable', value:195000, ...defaultExtras(195000,true),
+      special:{ tradingHold:'None', cashReserve:'Min cash: $15,000 + 3% buffer', securityRestrictions:'None', recurringWithdrawals:'None' } },
+    { id:'m7', name:'Trust Account', type:'Trust', num:'\u2022\u2022\u2022\u20225507', taxStatus:'taxable', value:380000, ...defaultExtras(380000,true) },
+    { id:'m8', name:'403(b)', type:'403(b)', num:'\u2022\u2022\u2022\u20225508', taxStatus:'deferred', value:90000, ...defaultExtras(90000,false) },
+  ]},
+  thompson: { label:'Thompson Household', accounts:[
+    { id:'t1', name:'IRA', type:'Traditional IRA', num:'\u2022\u2022\u2022\u20226601', taxStatus:'deferred', value:290000, ...defaultExtras(290000,false) },
+    { id:'t2', name:'Roth IRA', type:'Roth IRA', num:'\u2022\u2022\u2022\u20226602', taxStatus:'free', value:140000, ...defaultExtras(140000,false) },
+    { id:'t3', name:'401(k)', type:'401(k)', num:'\u2022\u2022\u2022\u20226603', taxStatus:'deferred', value:520000, ...defaultExtras(520000,false) },
+    { id:'t4', name:'SEP IRA', type:'SEP IRA', num:'\u2022\u2022\u2022\u20226604', taxStatus:'deferred', value:175000, ...defaultExtras(175000,false) },
+    { id:'t5', name:'403(b)', type:'403(b)', num:'\u2022\u2022\u2022\u20226605', taxStatus:'deferred', value:110000, ...defaultExtras(110000,false) },
+    { id:'t6', name:'SIMPLE IRA', type:'SIMPLE IRA', num:'\u2022\u2022\u2022\u20226606', taxStatus:'deferred', value:85000, ...defaultExtras(85000,false) },
+    { id:'t7', name:'Individual Brokerage', type:'Individual Brokerage', num:'\u2022\u2022\u2022\u20226607', taxStatus:'taxable', value:230000, ...defaultExtras(230000,true) },
+    { id:'t8', name:'Joint Brokerage', type:'Joint Brokerage', num:'\u2022\u2022\u2022\u20226608', taxStatus:'taxable', value:310000, ...defaultExtras(310000,true) },
+    { id:'t9', name:'Trust Account', type:'Trust', num:'\u2022\u2022\u2022\u20226609', taxStatus:'taxable', value:450000, ...defaultExtras(450000,true),
+      special:{ tradingHold:'Preserve positions \u2014 do not liquidate legacy holdings', cashReserve:'None', securityRestrictions:'None', recurringWithdrawals:'None' } },
+    { id:'t10', name:'Individual Brokerage #2', type:'Individual Brokerage', num:'\u2022\u2022\u2022\u20226610', taxStatus:'taxable', value:75000, ...defaultExtras(75000,true) },
+    { id:'t11', name:'Inherited IRA', type:'Inherited IRA', num:'\u2022\u2022\u2022\u20226611', taxStatus:'taxable', value:160000, ...defaultExtras(160000,true) },
+    { id:'t12', name:'Custodial Account', type:'Custodial (UTMA/UGMA)', num:'\u2022\u2022\u2022\u20226612', taxStatus:'taxable', value:40000, ...defaultExtras(40000,true) },
+  ]},
+};
+
+function freshAccountTemplate(householdKey){
+  const key = householdKey || 'henderson';
+  const base = JSON.parse(JSON.stringify(HOUSEHOLDS[key].accounts));
+  return base.map(a => Object.assign(a, { portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] }));
+}
+
+function mkPortfolio(idPrefix, catLabel, catKey, split, desc, ret, risk, aum, acctCount){
+  return { id: idPrefix+'-'+split.replace('/',''), name: catLabel+' ETF '+split+' Portfolio', category:catKey, split, desc, ret:ret+'%', risk:risk+'%', aum, accounts:acctCount };
 }
 
 const portfolios = [
-  { id:'conservative', name:'Conservative Income', split:'20/80', category:'core', desc:'Designed for capital preservation with modest growth expectations.', ret:'4.2%', risk:'3.1%' },
-  { id:'balanced', name:'Balanced Growth', split:'50/50', category:'core', desc:'Designed for investors seeking moderate growth and capital preservation.', ret:'7.2%', risk:'7.3%' },
-  { id:'growth', name:'Growth', split:'70/30', category:'core', desc:'Designed for long-term capital appreciation with moderate volatility risk.', ret:'8.9%', risk:'10.4%' },
-  { id:'aggressive', name:'Aggressive Growth', split:'90/10', category:'core', desc:'Designed for investors seeking to capture the growth of equity markets.', ret:'10.1%', risk:'14.2%' },
-  { id:'taxsensitive', name:'Tax-Sensitive ETF 20/80', split:'', category:'tax-sensitive', desc:'Optimized for after-tax return in taxable accounts.', ret:'5.1%', risk:'5.6%' },
-  { id:'sowell', name:'Sowell Classic Balanced', split:'', category:'custom', custom:true, desc:'Advisor-saved custom model portfolio.', ret:'8.4%', risk:'10.9%' },
+  // Global Core
+  mkPortfolio('gc','Global Core','global-core','100/0','Designed for investors seeking to capture the growth of equity markets over the long term.','10.0','15.2','$109.0K',1),
+  mkPortfolio('gc','Global Core','global-core','90/10','Designed for investors focusing on long-term capital growth.','9.6','14.0','$0',0),
+  mkPortfolio('gc','Global Core','global-core','75/25','Designed for investors pursuing long-term capital growth with a secondary focus on capital preservation.','9.0','12.1','$0',0),
+  mkPortfolio('gc','Global Core','global-core','60/40','Designed for investors seeking long-term growth balanced with capital preservation.','8.3','10.1','$0',0),
+  mkPortfolio('gc','Global Core','global-core','40/60','Designed for investors seeking moderate growth and capital preservation.','7.2','7.3','$0',0),
+  mkPortfolio('gc','Global Core','global-core','20/80','Designed for investors focusing on capital preservation with modest growth expectations.','6.1','4.4','$0',0),
+
+  // Tax-Sensitive
+  mkPortfolio('ts','Tax-Sensitive','tax-sensitive','100/0','Designed for investors seeking to capture the growth of equity markets over the long term.','8.7','13.9','$0',0),
+  mkPortfolio('ts','Tax-Sensitive','tax-sensitive','90/10','Designed for investors focusing on long-term capital growth in a taxable account.','8.3','12.7','$99.0K',1),
+  mkPortfolio('ts','Tax-Sensitive','tax-sensitive','75/25','Designed for investors pursuing long-term capital growth with a secondary focus on capital preservation in a taxable account.','7.7','10.8','$0',0),
+  mkPortfolio('ts','Tax-Sensitive','tax-sensitive','60/40','Designed for investors seeking long-term growth balanced with capital preservation in a taxable account.','7.0','8.9','$0',0),
+  mkPortfolio('ts','Tax-Sensitive','tax-sensitive','40/60','Designed for investors seeking moderate growth with capital preservation in a taxable account.','6.0','6.4','$0',0),
+  mkPortfolio('ts','Tax-Sensitive','tax-sensitive','20/80','Designed for investors focusing on capital preservation with modest growth expectations in a taxable account.','4.8','4.0','$200.3K',1),
+
+  // Core + Alts
+  mkPortfolio('ca','Core with Alts','core-alts','100/0','Designed for investors seeking full-growth potential with alternative strategy exposure.','10.3','15.3','$33.0K',1),
+  mkPortfolio('ca','Core with Alts','core-alts','90/10','Designed for investors focused on capital growth with limited alternative exposure.','9.9','14.0','$33.7K',1),
+  mkPortfolio('ca','Core with Alts','core-alts','75/25','Designed for investors pursuing growth with a significant allocation to alternative assets.','9.3','11.8','$31.2K',1),
+  mkPortfolio('ca','Core with Alts','core-alts','60/40','Designed for investors aiming for long-term growth with increased exposure to alternative assets.','8.7','9.6','$29.8K',1),
+  mkPortfolio('ca','Core with Alts','core-alts','40/60','Designed for investors seeking balanced exposure to traditional and alternative assets.','7.7','6.8','$28.3K',1),
+  mkPortfolio('ca','Core with Alts','core-alts','20/80','Designed for investors seeking a conservative allocation with exposure to alternative assets.','6.7','4.3','$26.9K',1),
+
+  // US Core
+  mkPortfolio('usc','U.S. Core','us-core','100/0','Designed for investors seeking to capture the growth of equity markets over the long term.','10.0','15.9','$53.5K',1),
+  mkPortfolio('usc','U.S. Core','us-core','90/10','Designed for investors focusing on long-term capital growth.','9.6','14.1','$49.2K',1),
+  mkPortfolio('usc','U.S. Core','us-core','75/25','Designed for investors pursuing long-term capital growth with a secondary focus on capital preservation.','8.8','11.7','$43.8K',1),
+  mkPortfolio('usc','U.S. Core','us-core','60/40','Designed for investors seeking long-term growth balanced with capital preservation.','8.1','9.5','$40.1K',1),
+  mkPortfolio('usc','U.S. Core','us-core','40/60','Designed for investors seeking moderate growth and capital preservation.','7.0','6.6','$79.2K',2),
+  mkPortfolio('usc','U.S. Core','us-core','20/80','Designed for investors focusing on capital preservation with modest growth expectations.','5.9','4.0','$30.5K',1),
+
+  // Multi-Asset Income
+  mkPortfolio('mai','Multi-Asset Income','multi-asset','75/25','Designed for investors who desire sustainable income over extended market cycles.','9.2','11.9','$41.0K',1),
+  mkPortfolio('mai','Multi-Asset Income','multi-asset','60/40','Designed for investors who desire sustainable income over extended market cycles.','8.6','10.3','$38.4K',1),
+  mkPortfolio('mai','Multi-Asset Income','multi-asset','40/60','Designed for investors who desire sustainable income over extended market cycles.','7.6','7.9','$34.8K',1),
+
+  // Custom models
+  { id:'cm1', name:'Global Core 60/40 with Crypto and no International REITs', category:'custom', custom:true, split:'', desc:'Global Core 60/40 with Digital Assets enabled (with NCIQ as the preferred ETF) & no International REITs.', ret:'8.0%', risk:'60%', riskTarget:true, strategy:'Core' },
+  { id:'cm2', name:'Global 60/40 with Crypto and Gold', category:'custom', custom:true, split:'', desc:'Add crypto to global', ret:'8.0%', risk:'60%', riskTarget:true, strategy:'Core' },
+  { id:'cm3', name:'Global 60/40 with Crypto', category:'custom', custom:true, split:'', desc:'Add crypto to core portfolios', ret:'8.1%', risk:'60%', riskTarget:true, strategy:'Core' },
 ];
+
+const PORTFOLIO_CATEGORIES = [
+  ['global-core','Global Core'],['tax-sensitive','Tax-Sensitive'],['core-alts','Core + Alts'],['us-core','US Core'],['multi-asset','Multi-Asset Income'],['custom','Custom']
+];
+
+function riskWord(riskStr){
+  const n = parseFloat(riskStr);
+  if(isNaN(n)) return 'Custom';
+  if(n < 6) return 'Conservative';
+  if(n < 10) return 'Moderate';
+  if(n < 13) return 'Growth';
+  return 'Aggressive';
+}
+
+
+const ALLOC_LABELS = {fixedIncome:'Fixed Income', usEquity:'US Equity', intlEquity:'Intl Equity', cash:'Cash'};
+const ALLOC_COLORS = {fixedIncome:'var(--chart-fixed)', usEquity:'var(--chart-us)', intlEquity:'var(--chart-intl)', cash:'var(--chart-cash)'};
 
 const exceptionTypes = [
   { id:'no_trade', label:'Do not trade a security' },
@@ -301,18 +673,30 @@ const exceptionTypes = [
 ];
 
 let accounts = [];
+let theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+document.documentElement.setAttribute('data-theme', theme);
+function toggleTheme(){
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  render();
+}
 
+function noneCheckedFor(householdKey){
+  const map = {};
+  HOUSEHOLDS[householdKey].accounts.forEach(a => map[a.id] = false);
+  return map;
+}
 function defaultState(){
   return {
     view: 'selectAccounts',      // selectAccounts | overview | activeAccount | review | success | stub
-    selectAccountsChecked: { ira:true, roth:true, brok1:true, '401k':true, brok2:true },
-    proposalName: 'Henderson Family Q3 Rebalance',
+    selectedHousehold: null,
+    selectAccountsChecked: {},
+    proposalName: '',
     selectedIds: [],
-    showPortfolioModal: false,
     showMixedWarning: false,
     showConflictWarning: false,
-    pendingPortfolioId: 'growth',
-    pillFilter: 'all',
+    pendingPortfolioId: null,
+    pillFilter: 'global-core',
     detailsOpenId: null,
     activeAccountId: null,
     activeTab: 'current',
@@ -322,6 +706,20 @@ function defaultState(){
     excFormType: 'no_trade',
     excFormValue: '',
     showResetConfirm: false,
+    sortKey: null,       // 'taxStatus' | 'status'
+    sortDir: 'asc',
+    expandedAccounts: {},
+    editingSpecial: null, // {accountId, field}
+    editingSpecialVal: '',
+    accountSnapshot: null,
+    sidebarAccountsExpanded: true,
+    sidebarShowAllAccounts: false,
+    instructionsPanelAccountId: null,
+    portfolioSelectError: false,
+    proposalGenerated: false,
+    reviewValidationBanner: false,
+    showPrototypeMenu: false,
+    selectAccountsError: false,
   };
 }
 let state = defaultState();
@@ -330,19 +728,24 @@ let state = defaultState();
 function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function getAccount(id){ return accounts.find(a=>a.id===id); }
 
+function isTaxable(a){ return a.taxStatus==='taxable'; }
+function taxStatusLabel(a){ return { taxable:'Taxable', deferred:'Tax-Deferred', free:'Tax-Free' }[a.taxStatus]; }
 function statusOf(a){
   if(!a.portfolio) return 'not_started';
-  if(a.taxable && !a.taxSetting) return 'tax_review';
+  if(isTaxable(a) && !a.taxSetting) return 'tax_review';
   return 'complete';
 }
 function statusLabel(s){
-  return { not_started:'Not started', tax_review:'Tax review required', complete:'Complete' }[s];
+  return { not_started:'Not started', tax_review:'Needs review', complete:'Complete' }[s];
 }
 function sideTagLabel(s){
-  return { not_started:'Incomplete', tax_review:'Needs review', complete:'Complete' }[s];
+  return { not_started:'Not started', tax_review:'Needs review', complete:'Complete' }[s];
+}
+function statusPencil(s, id){
+  return s==='tax_review' ? ` <span class="icon-btn" title="Review tax plan" onclick="event.stopPropagation();openAccount('${id}','tax')" style="padding:1px 3px;">\u270E</span>` : '';
 }
 function taxPlanLabel(a){
-  if(!a.taxable) return '\u2013';
+  if(!isTaxable(a)) return '\u2013';
   if(!a.taxSetting) return null;
   const labels = { minimal:'Minimal gains', median:'Median gains', max:'Max gains', custom: 'Custom' + (a.taxCustomAmt ? ' ('+fmt(parseFloat(a.taxCustomAmt)||0)+')' : '') };
   return labels[a.taxSetting];
@@ -350,10 +753,101 @@ function taxPlanLabel(a){
 function portfolioName(id){
   if(!id) return '\u2013';
   const p = portfolios.find(p=>p.id===id);
-  return p ? (p.name + (p.split ? ' ('+p.split+')' : '')) : id;
+  return p ? p.name : id;
+}
+function portfolioNameWithIcon(id){
+  if(!id) return '\u2013';
+  const p = portfolios.find(p=>p.id===id);
+  if(!p) return id;
+  const letter = CATEGORY_ICON_LETTER[p.category] || '?';
+  return `<div style="display:flex;align-items:flex-start;gap:8px;">
+    <span class="cat-icon-inline cat-${p.category}" style="margin-right:0;flex-shrink:0;">${letter}</span>
+    <span>${p.name}</span>
+  </div>`;
 }
 function allResolved(){ return accounts.every(a=>statusOf(a)==='complete'); }
 function completedCount(){ return accounts.filter(a=>statusOf(a)==='complete').length; }
+
+/* sorting (Tax status / Status columns) — 3-press cycle: asc -> desc -> default (alphabetical by name) */
+const STATUS_ORDER = { not_started:0, tax_review:1, complete:2 };
+const TAX_STATUS_ORDER = { taxable:0, deferred:1, free:2 };
+function setSort(key){
+  if(state.sortKey!==key){ state.sortKey = key; state.sortDir = 'asc'; }
+  else if(state.sortDir==='asc'){ state.sortDir = 'desc'; }
+  else { state.sortKey = null; state.sortDir = 'asc'; } // 3rd press: back to default
+  render();
+}
+function sortedAccounts(){
+  const list = accounts.slice();
+  if(!state.sortKey){
+    list.sort((a,b)=> a.name.localeCompare(b.name)); // default: alphabetical by account name
+    return list;
+  }
+  const dir = state.sortDir==='asc' ? 1 : -1;
+  list.sort((a,b)=>{
+    let av, bv;
+    if(state.sortKey==='taxStatus'){ av = TAX_STATUS_ORDER[a.taxStatus]; bv = TAX_STATUS_ORDER[b.taxStatus]; }
+    else if(state.sortKey==='value'){ av = a.value; bv = b.value; }
+    else { av = STATUS_ORDER[statusOf(a)]; bv = STATUS_ORDER[statusOf(b)]; }
+    return (av-bv)*dir;
+  });
+  return list;
+}
+function sortArrows(key){
+  const active = state.sortKey===key;
+  const up = active && state.sortDir==='asc';
+  const down = active && state.sortDir==='desc';
+  return `<span class="sort-arrows"><span class="${up?'active':''}">\u25B2</span><span class="${down?'active':''}">\u25BC</span></span>`;
+}
+
+/* special instructions (pre-applied at onboarding + proposal-time exceptions) */
+function specialCount(a){
+  const pre = Object.values(a.special).filter(v=>v && v!=='None').length;
+  return pre + a.exceptions.length;
+}
+function startEditSpecial(field){
+  state.editingSpecial = field;
+  state.editingSpecialVal = getAccount(state.activeAccountId).special[field];
+  render();
+}
+function saveEditSpecial(){
+  const a = getAccount(state.activeAccountId);
+  a.special[state.editingSpecial] = state.editingSpecialVal.trim() || 'None';
+  state.editingSpecial = null;
+  render();
+}
+function cancelEditSpecial(){ state.editingSpecial = null; render(); }
+
+/* Current Portfolio Overview helpers */
+function toggleExpand(id){
+  state.expandedAccounts[id] = !state.expandedAccounts[id];
+  render();
+}
+function aggregateAllocation(){
+  const total = accounts.reduce((s,a)=>s+a.value,0);
+  const agg = {fixedIncome:0,usEquity:0,intlEquity:0,cash:0};
+  accounts.forEach(a=>{ Object.keys(agg).forEach(k=> agg[k]+= (a.allocation[k]/100)*a.value ); });
+  Object.keys(agg).forEach(k=> agg[k] = total ? (agg[k]/total*100) : 0);
+  return agg;
+}
+function aggregateHoldings(){
+  const map = {};
+  accounts.forEach(a=> a.holdings.forEach(([sym,name,val])=>{
+    if(!map[sym]) map[sym] = {sym,name,val:0};
+    map[sym].val += val;
+  }));
+  const total = accounts.reduce((s,a)=>s+a.value,0);
+  return Object.values(map).sort((x,y)=>y.val-x.val).slice(0,5).map(h=>({...h, pct:(h.val/total*100)}));
+}
+function renderAllocBar(alloc){
+  return `<div class="alloc-bar">${Object.keys(alloc).map(k=>`<div style="width:${alloc[k]}%;background:${ALLOC_COLORS[k]}"></div>`).join('')}</div>
+  <div class="alloc-legend">${Object.keys(alloc).map(k=>`<div class="alloc-legend-item"><span class="alloc-swatch" style="background:${ALLOC_COLORS[k]}"></span>${ALLOC_LABELS[k]}: ${alloc[k].toFixed(1)}%</div>`).join('')}</div>`;
+}
+function renderHoldingsTable(rows){
+  return `<table class="holdings-table"><thead><tr><th>Holding</th><th>Value</th><th>% of account</th></tr></thead><tbody>
+    ${rows.map(([sym,name,val,pct])=>`<tr><td><b>${sym}</b> \u2014 ${name}</td><td>${fmt(val)}</td><td>${pct.toFixed(1)}%</td></tr>`).join('')}
+  </tbody></table>`;
+}
 
 function showToast(title, body){
   state.toast = {title, body};
@@ -364,6 +858,7 @@ function showToast(title, body){
 /* ---------------- RESET ---------------- */
 function askReset(){
   state.showResetConfirm = true;
+  state.showPrototypeMenu = false;
   render();
 }
 function cancelReset(){
@@ -375,16 +870,39 @@ function resetPrototype(){
   state = defaultState();
   render();
 }
+function togglePrototypeMenu(){ state.showPrototypeMenu = !state.showPrototypeMenu; render(); }
+function renderPrototypeChip(){
+  return `
+  <div class="prototype-chip" onclick="togglePrototypeMenu()">Prototype \u25BE</div>
+  ${state.showPrototypeMenu ? `<div class="prototype-menu">
+    <div class="prototype-menu-item" onclick="askReset()">Reset prototype</div>
+  </div>` : ''}`;
+}
 
 /* ---------------- SELECT ACCOUNTS (initial) ---------------- */
 function toggleSelectAccountsChecked(id){
   state.selectAccountsChecked[id] = !state.selectAccountsChecked[id];
+  state.selectAccountsError = false;
+  render();
+}
+function changeHousehold(key){
+  state.selectedHousehold = key;
+  state.selectAccountsChecked = noneCheckedFor(key);
+  state.proposalName = HOUSEHOLDS[key].label.replace(' Household','') + ' Family Q3 Rebalance';
   render();
 }
 function continueFromSelectAccounts(){
-  const master = freshAccountTemplate();
-  accounts = master.filter(a => state.selectAccountsChecked[a.id]);
-  if(accounts.length===0) return;
+  const master = freshAccountTemplate(state.selectedHousehold);
+  const chosen = master.filter(a => state.selectAccountsChecked[a.id]);
+  if(chosen.length===0){
+    state.selectAccountsError = true;
+    render();
+    const firstChk = document.querySelector('.acct-select-card .chk');
+    if(firstChk) firstChk.focus();
+    return;
+  }
+  state.selectAccountsError = false;
+  accounts = chosen;
   state.view = 'overview';
   render();
 }
@@ -395,6 +913,11 @@ function toggleSelect(id){
   if(i>-1) state.selectedIds.splice(i,1); else state.selectedIds.push(id);
   render();
 }
+function toggleSelectAll(){
+  if(state.selectedIds.length === accounts.length) state.selectedIds = [];
+  else state.selectedIds = accounts.map(a=>a.id);
+  render();
+}
 
 function openBulkPortfolioModal(){
   if(state.selectedIds.length===0) return;
@@ -403,7 +926,7 @@ function openBulkPortfolioModal(){
     state.conflictAccounts = conflicts;
     state.showConflictWarning = true;
   } else {
-    state.showPortfolioModal = true;
+    state.view = 'bulkPortfolioSelect';
   }
   render();
 }
@@ -416,15 +939,20 @@ function proceedPastConflict(exclude){
     });
   }
   state.showConflictWarning = false;
-  if(state.selectedIds.length>0) state.showPortfolioModal = true;
+  if(state.selectedIds.length>0) state.view = 'bulkPortfolioSelect';
   render();
 }
 
 function attemptApplyBulk(){
+  if(!state.pendingPortfolioId){
+    state.portfolioSelectError = true;
+    render();
+    return;
+  }
+  state.portfolioSelectError = false;
   const selected = state.selectedIds.map(getAccount);
-  const hasTaxable = selected.some(a=>a.taxable);
-  const hasNonTaxable = selected.some(a=>!a.taxable);
-  if(hasTaxable && hasNonTaxable){
+  const distinctStatuses = new Set(selected.map(a=>a.taxStatus));
+  if(distinctStatuses.size > 1){
     state.showMixedWarning = true;
     render();
   } else {
@@ -441,21 +969,54 @@ function finalizeBulkApply(){
   });
   const n = state.selectedIds.length;
   state.selectedIds = [];
-  state.showPortfolioModal = false;
+  state.view = 'overview';
   state.showMixedWarning = false;
+  state.detailsOpenId = null;
   render();
   showToast('Portfolio applied', n + ' account' + (n>1?'s':'') + ' updated to ' + portfolioName(state.pendingPortfolioId) + '.');
 }
 
 function cancelMixedWarning(){ state.showMixedWarning = false; render(); }
+function openPortfolioDetails(id){ state.detailsOpenId = id; state.instructionsPanelAccountId = null; render(); }
+function closePortfolioDetails(){ state.detailsOpenId = null; render(); }
+function openInstructionsPanel(id){ state.instructionsPanelAccountId = id; state.detailsOpenId = null; render(); }
+function closeInstructionsPanel(){ state.instructionsPanelAccountId = null; render(); }
 
+function tabOrderFor(a){
+  const order = ['current','portfolio','exceptions'];
+  if(isTaxable(a)) order.push('tax');
+  order.push('history');
+  return order;
+}
 function openAccount(id, tab){
+  const a = getAccount(id);
+  state.accountSnapshot = JSON.parse(JSON.stringify(a));
   state.activeAccountId = id;
   state.activeTab = tab || 'current';
   state.view = 'activeAccount';
   render();
 }
 function backToOverview(){ state.view='overview'; render(); }
+function cancelAccountWorkspace(){
+  if(state.accountSnapshot){
+    const idx = accounts.findIndex(x=>x.id===state.accountSnapshot.id);
+    if(idx>-1) accounts[idx] = state.accountSnapshot;
+  }
+  state.accountSnapshot = null;
+  state.view='overview';
+  render();
+}
+function saveAndContinueTab(){
+  const a = getAccount(state.activeAccountId);
+  const order = tabOrderFor(a);
+  const i = order.indexOf(state.activeTab);
+  if(i>-1 && i<order.length-1){
+    state.activeTab = order[i+1];
+    render();
+  } else {
+    saveAndReturn();
+  }
+}
 
 function setIndividualPortfolio(id){
   const a = getAccount(state.activeAccountId);
@@ -496,14 +1057,27 @@ function removeException(idx){
 function saveAndReturn(){
   const a = getAccount(state.activeAccountId);
   const s = statusOf(a);
+  state.accountSnapshot = null;
   state.view='overview';
   render();
   showToast('Saved', a.name + ' updated \u2014 ' + statusLabel(s) + '.');
 }
 
 function goReview(){ state.view='review'; render(); }
+function attemptContinueToReview(){
+  if(allResolved()){
+    state.reviewValidationBanner = false;
+    goReview();
+    return;
+  }
+  state.reviewValidationBanner = true;
+  render();
+  const el = document.getElementById('review-validation-banner');
+  if(el) el.focus();
+}
 function generateProposal(){
   if(!allResolved()) return;
+  state.proposalGenerated = true;
   state.view='success'; render();
 }
 function openStub(label){ state.stubLabel = label; state.view='stub'; render(); }
@@ -528,27 +1102,34 @@ function taxFigures(a){
 
 /* ---------------- RENDER: SELECT ACCOUNTS ---------------- */
 function renderSelectAccounts(){
-  const master = freshAccountTemplate();
-  const anyChecked = Object.values(state.selectAccountsChecked).some(v=>v);
-  const cards = master.map(a=>{
+  const hasHousehold = !!state.selectedHousehold;
+  const master = hasHousehold ? freshAccountTemplate(state.selectedHousehold) : [];
+  const checkedAccounts = master.filter(a=>state.selectAccountsChecked[a.id]);
+  const nChecked = checkedAccounts.length;
+  const checkedSum = checkedAccounts.reduce((s,a)=>s+a.value,0);
+  const cards = master.map((a,i)=>{
     const checked = !!state.selectAccountsChecked[a.id];
     return `<div class="acct-select-card ${checked?'checked':''}" onclick="toggleSelectAccountsChecked('${a.id}')">
-      <div class="chk ${checked?'checked':''}"></div>
+      <div class="chk ${checked?'checked':''}" tabindex="0" role="checkbox" aria-checked="${checked}"></div>
       <div class="asc-info">
         <div class="asc-name">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div>
-        <div class="asc-meta">${a.type} \u00b7 ${a.taxable?'Taxable':'Non-taxable'}</div>
+        <div class="asc-meta">${a.type} \u00b7 ${taxStatusLabel(a)}</div>
       </div>
       <div class="asc-val">${fmt(a.value)}</div>
     </div>`;
   }).join('');
 
+  const householdOptions = `<option value="" disabled ${!hasHousehold?'selected':''}>Select a household\u2026</option>` +
+    Object.keys(HOUSEHOLDS).map(key =>
+      `<option value="${key}" ${state.selectedHousehold===key?'selected':''}>${HOUSEHOLDS[key].label} (${HOUSEHOLDS[key].accounts.length} accounts)</option>`
+    ).join('');
+
   return `
   <div class="main" style="width:100%;">
     <div class="topbar">
       <div class="topbar-fields">
-        <div><div class="tf-label">Client</div><div class="tf-value">Henderson Household</div></div>
+        <div><div class="tf-label">Client</div><div class="tf-value">${hasHousehold ? HOUSEHOLDS[state.selectedHousehold].label : '\u2014'}</div></div>
       </div>
-      <div class="topbar-actions"><button class="btn-reset" onclick="askReset()">Reset prototype</button></div>
     </div>
     <div class="content">
       <h1 class="page-title">Define Relationship Context</h1>
@@ -556,50 +1137,142 @@ function renderSelectAccounts(){
 
       <div class="field-block">
         <label>Proposal name</label>
-        <input type="text" value="${state.proposalName}" oninput="state.proposalName=this.value">
+        <input type="text" value="${state.proposalName}" oninput="state.proposalName=this.value" placeholder="Name this proposal">
       </div>
       <div class="field-block">
         <label>Household</label>
-        <select><option>Henderson Household</option></select>
+        <div class="styled-select-wrap">
+          <select class="styled-select" onchange="changeHousehold(this.value)">${householdOptions}</select>
+        </div>
       </div>
 
-      <div style="font-weight:700; font-size:13.5px; margin:22px 0 10px;">Select accounts</div>
-      ${cards}
+      ${hasHousehold ? `
+        <div style="font-weight:700; font-size:13.5px; margin:22px 0 10px;">Select accounts</div>
+        ${cards}
+        <div style="font-size:13px;color:var(--t-secondary);margin-top:10px;">
+          <span style="color:var(--t-primary);font-weight:600;">${nChecked} of ${master.length} accounts selected</span> \u00b7 <span style="color:var(--t-primary);font-weight:600;">${fmt(checkedSum)}</span>
+        </div>
+        ${state.selectAccountsError ? `<div style="color:var(--danger-tx);font-size:13px;font-weight:600;margin-top:8px;">Select at least one account to continue.</div>` : ''}
+      ` : `<div class="stub-box" style="margin-top:10px;">Select a household above to see its accounts.</div>`}
 
       <div class="btn-row">
-        <button class="btn btn-primary" ${anyChecked?'':'disabled'} onclick="continueFromSelectAccounts()">Continue to Configure Accounts</button>
+        <button class="btn btn-primary" onclick="continueFromSelectAccounts()">Continue to Configure Accounts</button>
       </div>
     </div>
   </div>`;
 }
 
-/* ---------------- RENDER: SIDEBAR ---------------- */
-function renderSidebar(){
-  const accRows = accounts.map(a=>{
-    const s = statusOf(a);
-    const isActive = state.view==='activeAccount' && state.activeAccountId===a.id;
-    return `<div class="nav-account-row ${isActive?'active-acct':''}" onclick="openAccount('${a.id}')">
-      <div class="name-wrap"><span class="name">${a.name} <span class="num-inline">(${a.num})</span></span></div>
-      <span class="side-tag ${s}">${sideTagLabel(s)}</span>
-    </div>`;
-  }).join('');
+/* ---------------- RENDER: SIDEBAR (gated stepper) ---------------- */
+function toggleSidebarAccounts(){ state.sidebarAccountsExpanded = !state.sidebarAccountsExpanded; render(); }
+function toggleShowAllSidebarAccounts(){ state.sidebarShowAllAccounts = !state.sidebarShowAllAccounts; render(); }
 
+const SIDEBAR_STEPS = [
+  { key:'setup', num:1, label:'Proposal Setup' },
+  { key:'currentPortfolio', num:2, label:'Current Portfolio Overview' },
+  { key:'configure', num:3, label:'Configure Accounts' },
+  { key:'proposed', num:4, label:'Proposed Portfolio Overview' },
+  { key:'review', num:5, label:'Final Review' },
+  { key:'generate', num:6, label:'Generate Proposal' },
+  { key:'implement', num:7, label:'Implement' },
+];
+function currentStepKey(){
+  if(state.view==='selectAccounts') return 'setup';
+  if(state.view==='currentPortfolioOverview') return 'currentPortfolio';
+  if(['overview','activeAccount','bulkPortfolioSelect'].includes(state.view)) return 'configure';
+  if(state.view==='review') return 'review';
+  if(state.view==='success') return 'generate';
+  if(state.view==='stub' && state.stubLabel==='Proposed Portfolio Overview') return 'proposed';
+  if(state.view==='stub' && state.stubLabel==='Implement') return 'implement';
+  return null;
+}
+function stepUnlocked(key){
+  if(key==='setup') return true;
+  const setupDone = !!state.selectedHousehold && Object.values(state.selectAccountsChecked).some(v=>v);
+  if(key==='currentPortfolio') return setupDone;
+  return accounts.length>0; // configure/proposed/review/generate/implement: unlock once Continue has actually run
+}
+function stepComplete(key){
+  if(key==='setup') return accounts.length>0;
+  if(key==='configure') return accounts.length>0 && allResolved();
+  if(key==='review' || key==='generate') return state.proposalGenerated;
+  return false;
+}
+function goToCurrentPortfolioOverview(){
+  if(accounts.length===0 && state.selectedHousehold){
+    const master = freshAccountTemplate(state.selectedHousehold);
+    accounts = master.filter(a => state.selectAccountsChecked[a.id]);
+  }
+  state.view='currentPortfolioOverview';
+  render();
+}
+const SIDEBAR_STEP_NAV = {
+  setup: "state.view='selectAccounts';render()",
+  currentPortfolio: "goToCurrentPortfolioOverview()",
+  configure: "state.view='overview';state.sidebarAccountsExpanded=true;render()",
+  proposed: "openStub('Proposed Portfolio Overview')",
+  review: "goReview()",
+  generate: "goReview()",
+  implement: "openStub('Implement')",
+};
+function renderSidebarStep(step){
+  const unlocked = stepUnlocked(step.key);
+  const isCurrent = currentStepKey()===step.key;
+  const complete = stepComplete(step.key);
+  const attrs = unlocked
+    ? `tabindex="0" role="button" ${isCurrent?'aria-current="step"':''} onclick="${SIDEBAR_STEP_NAV[step.key]}"`
+    : `tabindex="-1" aria-disabled="true" title="Complete Proposal Setup to unlock"`;
+  const marker = complete ? `<span class="step-check">&#10003;</span>` : `<span class="step-num">${step.num}</span>`;
+  const chevron = step.key==='configure'
+    ? `<span class="chevron ${state.sidebarAccountsExpanded?'open':''}" style="cursor:pointer;" onclick="event.stopPropagation();toggleSidebarAccounts()">&#9656;</span>`
+    : '';
+  const subLine = (step.key==='configure' && accounts.length>0)
+    ? `<div class="step-sub">${completedCount()} of ${accounts.length} accounts complete</div>` : '';
+
+  let nested = '';
+  if(step.key==='configure' && unlocked && state.sidebarAccountsExpanded){
+    const TRUNCATE_AT = 8;
+    const showAll = state.sidebarShowAllAccounts || accounts.length <= TRUNCATE_AT;
+    const visibleAccounts = showAll ? accounts : accounts.slice(0, TRUNCATE_AT);
+    const accRows = visibleAccounts.map(a=>{
+      const s = statusOf(a);
+      const isActive = state.view==='activeAccount' && state.activeAccountId===a.id;
+      return `<div class="nav-account-row ${isActive?'active-acct':''}" onclick="openAccount('${a.id}')">
+        <div class="name-wrap"><span class="name">${a.name} <span class="num-inline">(${a.num})</span></span></div>
+        <span class="side-tag ${s}">${sideTagLabel(s)}${statusPencil(s, a.id)}</span>
+      </div>`;
+    }).join('');
+    const showAllToggle = accounts.length > TRUNCATE_AT
+      ? `<div class="nav-account-row" onclick="toggleShowAllSidebarAccounts()" style="color:var(--t-link);font-weight:600;">
+          <span class="name" style="color:var(--t-link);">${showAll ? 'Show less' : 'Show all ('+accounts.length+')'}</span>
+        </div>`
+      : '';
+    nested = `<div class="nav-sub">
+      <div class="nav-account-row ${state.view==='overview'?'active-acct':''}" onclick="backToOverview()" style="font-weight:600;">
+        <span class="name" style="color:${state.view==='overview'?'var(--tn-lbl)':'var(--ink)'}">Acct Progress Overview</span>
+      </div>
+      ${accRows}
+      ${showAllToggle}
+    </div>`;
+  }
+
+  return `<div class="step-item ${isCurrent?'current':''} ${unlocked?'clickable':''}" ${attrs}>
+    ${marker}
+    <div class="step-body">
+      <div class="step-row-head"><span>${step.label}</span>${chevron}</div>
+      ${subLine}
+    </div>
+  </div>${nested}`;
+}
+function renderSidebar(){
   return `
   <div class="sidebar">
     <div class="brand"><div class="brand-mark"></div><div class="brand-name">FRONTIER ONE</div></div>
-    <div class="nav-item" onclick="state.view='selectAccounts';render()">Proposal Setup</div>
-    <div class="nav-item" onclick="openStub('Current Portfolio Overview')">Current Portfolio Overview</div>
-    <div class="nav-item active">Configure Accounts</div>
-    <div class="nav-sub">
-      <div class="nav-account-row ${state.view==='overview'?'active-acct':''}" onclick="backToOverview()" style="font-weight:600;">
-        <span class="name" style="color:${state.view==='overview'?'var(--indigo)':'var(--ink)'}">Acct Progress Overview</span>
-      </div>
-      ${accRows}
+    ${SIDEBAR_STEPS.map(renderSidebarStep).join('')}
+    <div class="sidebar-spacer"></div>
+    <div class="theme-toggle" onclick="toggleTheme()" role="button" aria-pressed="${theme==='dark'}">
+      <span class="tt-label">${theme==='dark' ? 'Switch to light mode' : 'Switch to dark mode'}</span>
+      <span class="tt-switch ${theme==='dark'?'on':''}"></span>
     </div>
-    <div class="nav-item" onclick="openStub('Proposed Portfolio Overview')">Proposed Portfolio Overview</div>
-    <div class="nav-item ${state.view==='review'?'active':''}" onclick="goReview()">Final Review</div>
-    <div class="nav-item" onclick="goReview()">Generate Proposal</div>
-    <div class="nav-item" onclick="openStub('Implement')">Implement</div>
   </div>`;
 }
 
@@ -608,12 +1281,11 @@ function renderTopbar(){
   <div class="topbar">
     <div class="topbar-fields">
       <div><div class="tf-label">Proposal ID</div><div class="tf-value">F1P-2026-002301</div></div>
-      <div><div class="tf-label">Client</div><div class="tf-value">Henderson Household</div></div>
+      <div><div class="tf-label">Client</div><div class="tf-value">${HOUSEHOLDS[state.selectedHousehold].label}</div></div>
       <div><div class="tf-label">Accounts</div><div class="tf-value">${accounts.length}</div></div>
       <div><div class="tf-label">Total value</div><div class="tf-value">${fmt(accounts.reduce((s,a)=>s+a.value,0))}</div></div>
     </div>
     <div class="topbar-actions">
-      <button class="btn-reset" onclick="askReset()">Reset prototype</button>
       <button class="btn-save-exit">Save &amp; Exit</button>
     </div>
   </div>`;
@@ -633,46 +1305,122 @@ function renderStub(){
 }
 
 /* ---------------- RENDER: OVERVIEW ---------------- */
+/* ---------------- RENDER: CURRENT PORTFOLIO OVERVIEW ---------------- */
+function renderCurrentPortfolioOverview(){
+  const totalVal = accounts.reduce((s,a)=>s+a.value,0);
+  const agg = aggregateAllocation();
+  const aggHold = aggregateHoldings();
+
+  const accountSections = accounts.map(a=>{
+    const open = !!state.expandedAccounts[a.id];
+    return `<div class="acct-collapse">
+      <div class="acct-collapse-head" onclick="toggleExpand('${a.id}')">
+        <div>
+          <div class="acct-name">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div>
+          <div class="acct-num">${a.type} \u00b7 <span class="pill ${a.taxStatus}" style="margin-left:4px;">${taxStatusLabel(a)}</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="font-weight:700;font-size:15px;">${fmt(a.value)}</div>
+          <span class="chevron ${open?'open':''}">&#9656;</span>
+        </div>
+      </div>
+      ${open ? `<div class="acct-collapse-body">
+        ${renderAllocBar(a.allocation)}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 2px;">
+          <span style="font-weight:700;font-size:13px;">Holdings</span>
+          <span style="font-size:11px;color:var(--t-secondary);">Sample data</span>
+        </div>
+        ${renderHoldingsTable(a.holdings)}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+
+  return `
+    <h1 class="page-title">Current Portfolio Overview</h1>
+    <p class="page-sub">Review current holdings and allocation across every account included in this proposal.</p>
+    <div class="progress-line">${accounts.length} account${accounts.length===1?'':'s'} in this proposal</div>
+
+    <div class="table-card" style="padding:18px 20px;margin-bottom:22px;">
+      <div style="font-weight:700;font-size:14px;margin-bottom:10px;">Aggregate asset allocation</div>
+      ${renderAllocBar(agg)}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 4px;">
+        <span style="font-weight:700;font-size:14px;">Aggregate top holdings</span>
+        <span style="font-size:11px;color:var(--t-secondary);">Sample data</span>
+      </div>
+      ${renderHoldingsTable(aggHold.map(h=>[h.sym,h.name,h.val,h.pct]))}
+    </div>
+
+    <div style="font-weight:700;font-size:14px;margin-bottom:10px;">Accounts</div>
+    ${accountSections}
+
+    <div class="btn-row" style="justify-content:space-between;">
+      <button class="btn btn-secondary" onclick="state.view='selectAccounts';render()">Back to Proposal Setup</button>
+      <button class="btn btn-primary" onclick="backToOverview()">Continue to Configure Accounts</button>
+    </div>
+  `;
+}
+
 function renderOverview(){
   const nSelected = state.selectedIds.length;
   const nComplete = completedCount();
-  const rows = accounts.map(a=>{
+  const selectedSum = state.selectedIds.map(getAccount).reduce((s,a)=>s+a.value,0);
+  const allChecked = accounts.length>0 && nSelected===accounts.length;
+  const someChecked = nSelected>0 && !allChecked;
+  const rows = sortedAccounts().map(a=>{
     const s = statusOf(a);
     const checked = state.selectedIds.includes(a.id);
-    const excCell = a.exceptions.length
-      ? `<span class="exc-link" onclick="event.stopPropagation();openAccount('${a.id}','exceptions')">${a.exceptions.length} exception${a.exceptions.length>1?'s':''}</span>`
-      : `<span class="icon-btn" title="Add exception" onclick="event.stopPropagation();openAccount('${a.id}','exceptions')">&#43;</span>`;
+    const sc = specialCount(a);
+    const excCell = sc>0
+      ? `<span class="exc-link" onclick="event.stopPropagation();openInstructionsPanel('${a.id}')">${sc} instruction${sc>1?'s':''}</span>`
+      : `<span class="add-link" onclick="event.stopPropagation();openInstructionsPanel('${a.id}')">+ Add</span>`;
     const planLabel = taxPlanLabel(a);
-    const taxPlanCell = !a.taxable ? '<span style="color:var(--ink-3)">N/A</span>'
+    const taxPlanCell = !isTaxable(a) ? '<span style="color:var(--t-secondary)" title="Tax plans apply to taxable accounts only.">Not applicable</span>'
       : planLabel ? planLabel
-      : `<span class="icon-btn" title="Set tax plan" onclick="event.stopPropagation();openAccount('${a.id}','tax')">&#43;</span>`;
-    return `<tr class="clickable" onclick="openAccount('${a.id}')">
+      : `<span class="add-link" onclick="event.stopPropagation();openAccount('${a.id}','tax')">+ Add</span>`;
+    return `<tr>
       <td onclick="event.stopPropagation()"><div class="chk ${checked?'checked':''}" onclick="toggleSelect('${a.id}')"></div></td>
-      <td><div class="acct-name">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div><div class="acct-num">${a.type}</div></td>
-      <td><span class="pill ${a.taxable?'taxable':'nontaxable'}">${a.taxable?'Taxable':'Non-taxable'}</span></td>
-      <td>${portfolioName(a.portfolio)}</td>
+      <td><div class="acct-name" onclick="openAccount('${a.id}')">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div><div class="acct-num">${a.type}</div></td>
+      <td><span class="pill ${a.taxStatus}">${taxStatusLabel(a)}</span></td>
+      <td>${fmt(a.value)}</td>
+      <td>${portfolioNameWithIcon(a.portfolio)}</td>
       <td>${taxPlanCell}</td>
       <td>${excCell}</td>
-      <td><span class="status-pill ${s}"><span class="dot"></span>${statusLabel(s)}</span></td>
+      <td><span class="status-pill ${s}"><span class="dot"></span>${statusLabel(s)}${statusPencil(s, a.id)}</span></td>
     </tr>`;
   }).join('');
+
+  const assignLabel = 'Assign Portfolio';
+  const selectionBar = nSelected===0
+    ? `<div class="selection-bar empty"><div class="sb-text">Select accounts to assign a portfolio</div><button class="btn btn-primary" disabled style="opacity:.38;">${assignLabel}</button></div>`
+    : `<div class="selection-bar"><div class="sb-text">${nSelected} of ${accounts.length} accounts selected \u00b7 <b>${fmt(selectedSum)} total</b></div><button class="btn btn-primary" onclick="openBulkPortfolioModal()">${assignLabel}</button></div>`;
+
+  const incomplete = accounts.filter(a=>statusOf(a)!=='complete');
+  const validationBanner = (state.reviewValidationBanner && incomplete.length>0) ? `
+    <div class="banner red" id="review-validation-banner" role="alert" tabindex="-1">
+      <div><b>${incomplete.length} account${incomplete.length>1?'s':''} still need${incomplete.length>1?'':'s'} configuration before review.</b>
+        <div style="margin-top:6px;">${incomplete.map(a=>`<span class="fix-link" style="margin-right:14px;" onclick="openAccount('${a.id}')">Configure ${a.name}</span>`).join('')}</div>
+      </div>
+    </div>` : '';
 
   return `
     <h1 class="page-title">Account Progress Overview</h1>
     <p class="page-sub">Select accounts to apply a portfolio in bulk, or click an account to configure it individually.</p>
-
-    <div class="summary-row">
-      <div class="summary-card"><div class="label">Total accounts</div><div class="val">${accounts.length}</div></div>
-      <div class="summary-card"><div class="label">Selected</div><div class="val">${nSelected}</div></div>
-      <div class="summary-card"><div class="label">Complete</div><div class="val">${nComplete} of ${accounts.length}</div></div>
+    <div class="progress-line">${nComplete} of ${accounts.length} accounts complete
+      <div class="progress-track"><div class="progress-fill" style="width:${accounts.length?Math.round(nComplete/accounts.length*100):0}%"></div></div>
     </div>
 
-    ${nSelected===0 ? `<div class="banner neutral">No accounts are currently selected for bulk configuration. Select one or more accounts, or click an account name to configure it individually.</div>` : ''}
+    ${validationBanner}
+    ${selectionBar}
 
     <div class="table-card">
       <table>
         <thead><tr>
-          <th style="width:36px"></th><th>Account</th><th>Tax status</th><th>Target portfolio</th><th>Tax plan</th><th>Exceptions</th><th>Status</th>
+          <th style="width:36px"><div class="chk ${allChecked?'checked':(someChecked?'indeterminate':'')}" onclick="toggleSelectAll()" role="checkbox" aria-checked="${allChecked?'true':(someChecked?'mixed':'false')}" aria-label="Select all accounts"></div></th>
+          <th>Account</th>
+          <th><span class="th-sort" onclick="setSort('taxStatus')">Tax status ${sortArrows('taxStatus')}</span></th>
+          <th><span class="th-sort" onclick="setSort('value')">Account value ${sortArrows('value')}</span></th>
+          <th>Target portfolio</th><th>Tax plan</th><th>Special instructions</th>
+          <th><span class="th-sort" onclick="setSort('status')">Status ${sortArrows('status')}</span></th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -681,76 +1429,183 @@ function renderOverview(){
     <div class="toolbar">
       <div class="left-note">${nSelected} of ${accounts.length} accounts selected</div>
       <div class="btn-row" style="margin-top:0">
-        <button class="btn btn-primary" ${nSelected? '' : 'disabled'} onclick="openBulkPortfolioModal()">Apply Portfolio to Selected</button>
+        <button class="btn btn-primary" ${nSelected? '' : 'disabled'} onclick="openBulkPortfolioModal()">${assignLabel}</button>
       </div>
     </div>
 
-    <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goReview()">Continue to Review</button>
+    <div class="btn-row" style="align-items:center;">
+      <span style="font-size:13px;color:var(--t-secondary);margin-right:auto;">${nComplete} of ${accounts.length} accounts complete</span>
+      <button class="btn btn-primary" onclick="attemptContinueToReview()">Continue to Review</button>
     </div>
   `;
 }
 
 /* ---------------- RENDER: PORTFOLIO MODAL ---------------- */
-function renderPortfolioModal(){
-  const selected = state.selectedIds.map(getAccount);
-  const totalVal = selected.reduce((s,a)=>s+a.value,0);
-  const filters = [['all','All'],['core','Core'],['tax-sensitive','Tax-Sensitive'],['custom','Custom']];
-  const filterHtml = filters.map(([id,label])=>
+/* ---------------- SHARED: portfolio card + details panel ---------------- */
+function renderPortfolioPillFilters(){
+  return PORTFOLIO_CATEGORIES.map(([id,label])=>
     `<span class="pill-filter ${state.pillFilter===id?'active':''}" onclick="state.pillFilter='${id}';render()">${label}</span>`
   ).join('');
-
-  const list = portfolios.filter(p=> state.pillFilter==='all' || p.category===state.pillFilter).map(p=>{
-    const sel = state.pendingPortfolioId===p.id;
-    const detailsOpen = state.detailsOpenId===p.id;
-    return `<div class="portfolio-card ${sel?'selected':''}" onclick="state.pendingPortfolioId='${p.id}';render()">
-      <div style="flex:1">
-        <div class="pf-name">${p.name}${p.split? ' ('+p.split+')':''} ${p.custom?'<span class="pf-tag">Custom</span>':''}</div>
-        <div class="pf-desc">${p.desc}</div>
-        <div class="details-link" onclick="event.stopPropagation(); state.detailsOpenId = state.detailsOpenId==='${p.id}'?null:'${p.id}'; render();">${detailsOpen?'Hide details':'View details'}</div>
-        ${detailsOpen ? `<div class="pf-details-box">Expected return: ${p.ret} &nbsp;\u00b7&nbsp; Risk (std. dev): ${p.risk}</div>` : ''}
-      </div>
-      <div class="pf-radio"></div>
-    </div>`;
-  }).join('');
-
+}
+const CATEGORY_ICON_LETTER = { 'global-core':'G', 'tax-sensitive':'T', 'core-alts':'A', 'us-core':'U', 'multi-asset':'M', 'custom':'C' };
+function categoryIconBadge(category, inline){
+  const letter = CATEGORY_ICON_LETTER[category] || '?';
+  return `<span class="${inline?'cat-icon-inline':'cat-icon'} cat-${category}">${letter}</span>`;
+}
+function renderSplitBar(p){
+  if(!p.split || p.split.indexOf('/')===-1) return '';
+  const [eq, fx] = p.split.split('/').map(Number);
+  return `<div class="split-bar-wrap">
+    <div class="split-bar"><div class="eq" style="width:${eq}%"></div><div class="fx" style="width:${fx}%"></div></div>
+    <span class="split-label">${p.split}</span>
+  </div>`;
+}
+function renderPortfolioCard(p, isSelected, onSelectAttr){
+  const hideAum = !p.custom && (p.aum === '$0' || p.aum === 0);
+  const subtitle = p.custom
+    ? `${riskWord(p.risk)} \u00b7 Strategy: ${p.strategy}`
+    : (hideAum ? `${riskWord(p.risk)} risk` : `${riskWord(p.risk)} risk \u00b7 ${p.aum} AUM`);
+  return `<div class="portfolio-card ${isSelected?'selected':''}" ${onSelectAttr}>
+    ${renderSplitBar(p)}
+    <div style="flex:1;min-width:0;">
+      <div class="pf-name">${p.name} ${p.custom?'<span class="pf-tag">Custom</span>':''}</div>
+      <!-- Open question: is AUM firm-specific? Confirm with product. -->
+      <div class="pf-subtitle">${subtitle}</div>
+      <div class="pf-desc">${p.desc}</div>
+      <div class="details-link" onclick="event.stopPropagation();openPortfolioDetails('${p.id}')">View details</div>
+    </div>
+    <div class="pf-radio"></div>
+  </div>`;
+}
+function synthAllocation(p){
+  if(p.custom) return { equity:55, fixedIncome:35, alternatives:5, cash:5 };
+  const [eq, fx] = p.split.split('/').map(Number);
+  let equity = eq, fixedIncome = fx, alternatives = 0;
+  if(p.category==='core-alts'){ alternatives = Math.round(equity*0.15); equity = equity - alternatives; }
+  return { equity, fixedIncome, alternatives, cash:0 };
+}
+function renderDetailsPanel(){
+  const p = portfolios.find(x=>x.id===state.detailsOpenId);
+  if(!p) return '';
+  const alloc = synthAllocation(p);
   return `
-  <div class="modal-overlay">
-    <div class="modal">
-      <h2>Select portfolio for ${selected.length} account${selected.length>1?'s':''}</h2>
-      <p class="sub">Applying portfolio choice to: ${selected.map(a=>a.name).join(', ')}</p>
-      <div style="margin-bottom:14px">${filterHtml}<span class="disabled-pill" style="margin-left:4px" title="Coming soon">Compare portfolios</span></div>
-      <div>${list}</div>
-      <div style="background:#FAFAFD;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:14px;">
-        <div style="font-weight:700;font-size:12.5px;margin-bottom:8px;">Selected accounts allocation target</div>
-        ${selected.map(a=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;"><span>${a.name}</span><span style="font-weight:600">${fmt(a.value)}</span></div>`).join('')}
-        <div style="display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0 0;border-top:1px solid var(--border);margin-top:6px;font-weight:700;"><span>Total applied value</span><span>${fmt(totalVal)}</span></div>
+  <div class="details-panel">
+    <div class="details-panel-head">
+      <div style="font-weight:700;font-size:16px;">${p.name}</div>
+      <span class="icon-btn" onclick="closePortfolioDetails()" title="Close" style="font-size:18px;">&times;</span>
+    </div>
+    <div class="details-panel-body">
+      <div class="dp-section-title">Overview</div>
+      <p class="dp-desc">${p.desc}</p>
+      <div class="dp-card">
+        <div class="dp-row"><span class="dp-k">Risk level</span><span class="dp-v">${p.risk}</span></div>
+        <div class="dp-row"><span class="dp-k">Expected return</span><span class="dp-v">${p.ret}</span></div>
+        ${!p.custom ? `<div class="dp-row"><span class="dp-k">AUM</span><span class="dp-v">${p.aum}</span></div>
+        <div class="dp-row"><span class="dp-k">Accounts currently using it</span><span class="dp-v">${p.accounts}</span></div>` : `<div class="dp-row"><span class="dp-k">Strategy</span><span class="dp-v">${p.strategy}</span></div>`}
       </div>
-      <div class="btn-row">
-        <button class="btn btn-secondary" onclick="state.showPortfolioModal=false;render()">Cancel</button>
-        <button class="btn btn-primary" onclick="attemptApplyBulk()">Apply to selected accounts</button>
+
+      <div class="dp-section-title">Allocation</div>
+      <div class="dp-card" style="padding:16px;">${renderAllocBarGeneric(alloc)}</div>
+
+      <div class="dp-section-title">Performance</div>
+      <p class="dp-desc">Historical performance information available in FrontierOne.</p>
+
+      <div class="dp-section-title">Additional details</div>
+      <div class="dp-card">
+        <div class="dp-row"><span class="dp-k">Category</span><span class="dp-v">${PORTFOLIO_CATEGORIES.find(c=>c[0]===p.category)?.[1] || p.category}</span></div>
+        <div class="dp-row"><span class="dp-k">Portfolio type</span><span class="dp-v">${p.custom?'Custom Model':'New Frontier Model'}</span></div>
       </div>
     </div>
   </div>`;
+}
+function renderInstructionsPanel(){
+  const a = getAccount(state.instructionsPanelAccountId);
+  if(!a) return '';
+  const fieldMeta = [['tradingHold','Trading Hold'],['cashReserve','Cash Reserve Policy'],['securityRestrictions','Security Restrictions'],['recurringWithdrawals','Recurring Withdrawals']];
+  const onboardingRows = fieldMeta.filter(([key])=> a.special[key] && a.special[key]!=='None')
+    .map(([key,label])=>`<div class="dp-row"><span class="dp-k">${label}</span><span class="dp-v">${a.special[key]}</span></div>`).join('');
+  const exceptionRows = a.exceptions.map(e=>`<div class="dp-row"><span class="dp-v">${e}</span></div>`).join('');
+  return `
+  <div class="details-panel">
+    <div class="details-panel-head">
+      <div>
+        <div style="font-weight:700;font-size:16px;">${a.name} <span style="color:var(--ink-3);font-weight:500;font-size:13px;">(${a.num})</span></div>
+        <div style="font-size:12px;color:var(--ink-2);margin-top:2px;">Special instructions</div>
+      </div>
+      <span class="icon-btn" onclick="closeInstructionsPanel()" title="Close" style="font-size:18px;">&times;</span>
+    </div>
+    <div class="details-panel-body">
+      <div class="dp-section-title">On file</div>
+      <div class="dp-card">${onboardingRows || '<div class="empty-note">None on file.</div>'}</div>
+
+      <div class="dp-section-title">Added for this proposal</div>
+      <div class="dp-card">${exceptionRows || '<div class="empty-note">None added.</div>'}</div>
+
+      <div class="details-link" onclick="closeInstructionsPanel();openAccount('${a.id}','exceptions')">Manage special instructions \u2192</div>
+    </div>
+  </div>`;
+}
+function renderAllocBarGeneric(alloc){
+  const labels = {equity:'Equity', fixedIncome:'Fixed Income', alternatives:'Alternatives', cash:'Cash'};
+  const colors = {equity:'var(--chart-us)', fixedIncome:'var(--chart-fixed)', alternatives:'var(--chart-alts)', cash:'var(--chart-cash)'};
+  const parts = Object.keys(alloc).filter(k=>alloc[k]>0);
+  return `<div class="alloc-bar">${parts.map(k=>`<div style="width:${alloc[k]}%;background:${colors[k]}"></div>`).join('')}</div>
+  <div class="alloc-legend">${parts.map(k=>`<div class="alloc-legend-item"><span class="alloc-swatch" style="background:${colors[k]}"></span>${labels[k]}: ${alloc[k]}%</div>`).join('')}</div>`;
+}
+
+/* ---------------- RENDER: BULK PORTFOLIO SELECT (full page, not a modal) ---------------- */
+function renderBulkPortfolioSelect(){
+  const selected = state.selectedIds.map(getAccount);
+  const totalVal = selected.reduce((s,a)=>s+a.value,0);
+  const list = portfolios.filter(p=> p.category===state.pillFilter)
+    .map(p => renderPortfolioCard(p, state.pendingPortfolioId===p.id, `onclick="state.pendingPortfolioId='${p.id}';state.portfolioSelectError=false;render()"`))
+    .join('');
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+      <div>
+        <h1 class="page-title">Select portfolio for ${selected.length} account${selected.length>1?'s':''}</h1>
+        <p class="page-sub">Applying portfolio choice to: ${selected.map(a=>a.name).join(', ')}</p>
+      </div>
+      <button class="btn btn-secondary" disabled title="Coming in a future release" style="flex-shrink:0;">Compare (coming soon)</button>
+    </div>
+
+    <div style="background:var(--subtle);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:18px;">
+      <div style="font-weight:700;font-size:12.5px;margin-bottom:8px;">Selected accounts allocation target</div>
+      ${selected.map(a=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;"><span>${a.name}</span><span style="font-weight:600">${fmt(a.value)}</span></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0 0;border-top:1px solid var(--border);margin-top:6px;font-weight:700;"><span>Total applied value</span><span>${fmt(totalVal)}</span></div>
+    </div>
+
+    <div style="margin-bottom:14px">${renderPortfolioPillFilters()}</div>
+    <div class="portfolio-grid">${list}</div>
+
+    ${state.portfolioSelectError ? `<div style="color:var(--danger-tx);font-size:13px;font-weight:600;margin-top:16px;">Choose a portfolio to continue.</div>` : ''}
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="state.view='overview';state.detailsOpenId=null;render()">Cancel</button>
+      <button class="btn btn-primary" onclick="attemptApplyBulk()">Apply to selected accounts</button>
+    </div>
+  `;
 }
 
 /* ---------------- RENDER: MIXED TAX WARNING ---------------- */
 function renderMixedWarning(){
   const selected = state.selectedIds.map(getAccount);
-  const taxable = selected.filter(a=>a.taxable);
-  const nontax = selected.filter(a=>!a.taxable);
+  const taxableAccts = selected.filter(a=>a.taxStatus==='taxable');
+  const deferredAccts = selected.filter(a=>a.taxStatus==='deferred');
+  const freeAccts = selected.filter(a=>a.taxStatus==='free');
+  const groups = [['Taxable', taxableAccts], ['Tax-Deferred', deferredAccts], ['Tax-Free', freeAccts]].filter(([,list])=>list.length>0);
   return `
   <div class="modal-overlay">
     <div class="modal" style="max-width:520px">
       <h2>Mixed tax status warning</h2>
       <p class="sub">You're applying the same portfolio to accounts with different tax statuses.</p>
       <div class="banner amber">
-        <div><b>${taxable.length} of ${selected.length}</b> selected accounts are taxable and will still need individual tax settings reviewed after this is applied. Non-taxable accounts require no further action.</div>
+        <div><b>${taxableAccts.length} of ${selected.length}</b> selected accounts are taxable and will still need individual tax settings reviewed after this is applied. Tax-deferred and tax-free accounts require no further tax action.</div>
       </div>
-      <div style="margin-bottom:6px;font-weight:600;font-size:12.5px;">Taxable</div>
-      ${taxable.map(a=>`<div style="font-size:13px;padding:4px 0;">${a.name} \u2014 ${a.num}</div>`).join('') || '<div class="empty-note">None</div>'}
-      <div style="margin:12px 0 6px;font-weight:600;font-size:12.5px;">Non-taxable</div>
-      ${nontax.map(a=>`<div style="font-size:13px;padding:4px 0;">${a.name} \u2014 ${a.num}</div>`).join('') || '<div class="empty-note">None</div>'}
+      ${groups.map(([label,list])=>`
+        <div style="margin:12px 0 6px;font-weight:600;font-size:12.5px;">${label}</div>
+        ${list.map(a=>`<div style="font-size:13px;padding:4px 0;">${a.name} \u2014 ${a.num}</div>`).join('')}
+      `).join('')}
       <div class="btn-row">
         <button class="btn btn-secondary" onclick="cancelMixedWarning()">Go back and adjust selection</button>
         <button class="btn btn-primary" onclick="finalizeBulkApply()">Proceed</button>
@@ -783,8 +1638,9 @@ function renderConflictWarning(){
 /* ---------------- RENDER: ACCOUNT WORKSPACE ---------------- */
 function renderAccountWorkspace(){
   const a = getAccount(state.activeAccountId);
-  let tabs = [['current','Current Portfolio'],['portfolio','Portfolio Selection'],['restrictions','Restrictions'],['exceptions','Exceptions']];
-  if(a.taxable) tabs.push(['tax','Tax Settings']);
+  let tabs = [['current','Current Portfolio'],['portfolio','Portfolio Selection'],['exceptions','Special Instructions']];
+  if(isTaxable(a)) tabs.push(['tax','Tax Settings']);
+  tabs.push(['history','History']);
 
   let body = '';
   if(state.activeTab==='current'){
@@ -797,28 +1653,60 @@ function renderAccountWorkspace(){
   } else if(state.activeTab==='portfolio'){
     const bannerHtml = (a.portfolio && a.source==='bulk')
       ? `<div class="assigned-banner">Assigned via bulk configuration: ${portfolioName(a.portfolio)}. You can override it below for this account only.</div>` : '';
-    const list = portfolios.map(p=>{
-      const checked = a.portfolio===p.id;
-      return `<div class="radio-line ${checked?'checked':''}" onclick="setIndividualPortfolio('${p.id}')">
-        <div class="radio-circle"></div>
-        <div class="rl-label">${p.name}${p.split?' ('+p.split+')':''} ${p.custom?'<span class="pf-tag">Custom</span>':''}</div>
+    const list = portfolios.filter(p=> p.category===state.pillFilter)
+      .map(p => renderPortfolioCard(p, a.portfolio===p.id, `onclick="setIndividualPortfolio('${p.id}')"`))
+      .join('');
+    body = `${bannerHtml}
+      <div style="margin-bottom:14px">${renderPortfolioPillFilters()}</div>
+      <div class="portfolio-grid">${list}</div>`;
+  } else if(state.activeTab==='history'){
+    const typeLabels = { portfolio:'Portfolio', tax:'Tax Settings', special:'Special Instruction' };
+    const entries = (a.history||[]).filter(h => h.type!=='tax' || isTaxable(a));
+    const rows = entries.map(h=>{
+      const isCurrent = h.state==='current';
+      const dateLine = isCurrent ? `Applied ${h.applied}` : `Applied ${h.applied} \u2192 ${h.state==='replaced'?'Replaced':'Lifted'} ${h.endDate}`;
+      return `<div class="history-item ${isCurrent?'':'muted'}">
+        <div class="hist-type">${typeLabels[h.type]}</div>
+        <div class="hist-setting">${h.setting}</div>
+        <div class="hist-dates">${dateLine}</div>
+        <span class="hist-state-pill ${h.state}">${h.state.charAt(0).toUpperCase()+h.state.slice(1)}</span>
       </div>`;
     }).join('');
-    body = `${bannerHtml}<div class="table-card" style="padding:6px 18px;">${list}</div>`;
-  } else if(state.activeTab==='restrictions'){
-    body = `<p class="page-sub" style="margin-bottom:12px;">Screening rules applied to the portfolio model for this account (e.g. sector or issuer exclusions).</p>
-    <div class="table-card" style="padding:14px 18px;">
-      <div class="check-item">
-        <div class="chk ${a.restrictions.fossil?'checked':''}" onclick="toggleFossil()"></div>
-        <span>Restrict fossil-fuel industry tickers</span>
-      </div>
-      <div class="empty-note">No additional screening restrictions available for this account type.</div>
+    body = `<p class="page-sub" style="margin-bottom:12px;">A chronological record of portfolio, tax settings, and special instruction changes for this account.</p>
+    <div class="table-card" style="padding:6px 18px;">
+      ${rows || '<div class="empty-note">No configuration history yet for this account.</div>'}
     </div>`;
   } else if(state.activeTab==='exceptions'){
+    const fieldMeta = [['tradingHold','Trading Hold'],['cashReserve','Cash Reserve Policy'],['securityRestrictions','Security Restrictions'],['recurringWithdrawals','Recurring Withdrawals']];
+    const siRows = fieldMeta.map(([key,label])=>{
+      const val = a.special[key];
+      const hasVal = val && val !== 'None';
+      const editing = state.editingSpecial===key;
+      let valueCell;
+      if(editing){
+        valueCell = `<input type="text" class="si-edit-input" value="${state.editingSpecialVal}" oninput="state.editingSpecialVal=this.value">
+          <span class="si-edit-link" onclick="saveEditSpecial()">Save</span>
+          <span class="si-edit-link" onclick="cancelEditSpecial()" style="color:var(--ink-3)">Cancel</span>`;
+      } else {
+        valueCell = `<span class="si-value ${hasVal?'has-value':''}">${val}</span>
+          <span class="si-edit-link" onclick="startEditSpecial('${key}')">${hasVal?'Edit':'Add'}</span>`;
+      }
+      return `<tr><td class="si-label">${label}</td><td>${valueCell}</td></tr>`;
+    }).join('');
+
     const list = a.exceptions.map((e,i)=>`<div class="exception-item"><span>${e}</span><span class="exception-remove" onclick="removeException(${i})">Remove</span></div>`).join('');
-    body = `<p class="page-sub" style="margin-bottom:12px;">Account-specific trading exceptions \u2014 e.g. don't trade a particular security, or reserve a dollar amount from this account. Separate from portfolio-level screening restrictions.</p>
+
+    body = `
+    <div class="si-section-title">On file</div>
+    <p class="si-sub">Set when this account was onboarded. Editable here, but these live at the account level, not just this proposal.</p>
+    <div class="table-card" style="padding:6px 18px 12px;margin-bottom:22px;">
+      <table class="si-table">${siRows}</table>
+    </div>
+
+    <div class="si-section-title">Additional exceptions for this proposal</div>
+    <p class="si-sub">Account-specific trading exceptions \u2014 e.g. don't trade a particular security, or reserve a dollar amount from this account. Separate from portfolio-level screening restrictions.</p>
     <div class="table-card" style="padding:6px 18px;">
-      ${list || '<div class="empty-note">No exceptions added for this account.</div>'}
+      ${list || '<div class="empty-note">No additional exceptions added for this account.</div>'}
     </div>
     <div class="add-exception-form">
       <select onchange="state.excFormType=this.value;render()">
@@ -851,12 +1739,17 @@ function renderAccountWorkspace(){
     `;
   }
 
+  const order = tabOrderFor(a);
+  const isLastTab = order.indexOf(state.activeTab) === order.length-1;
+  const tabLabels = { current:'Current Portfolio', portfolio:'Portfolio Selection', exceptions:'Special Instructions', tax:'Tax Settings', history:'History' };
+  const nextLabel = isLastTab ? 'Save &amp; return to overview' : 'Save &amp; continue to ' + tabLabels[order[order.indexOf(state.activeTab)+1]];
+
   return `
     <div class="acct-header">
       <div class="field"><div class="label">Account</div><div class="val">${a.name}</div></div>
       <div class="field"><div class="label">Type</div><div class="val">${a.type}</div></div>
       <div class="field"><div class="label">Account #</div><div class="val">${a.num}</div></div>
-      <div class="field"><div class="label">Tax status</div><div class="val">${a.taxable?'Taxable':'Non-taxable'}</div></div>
+      <div class="field"><div class="label">Tax status</div><div class="val">${taxStatusLabel(a)}</div></div>
       <div class="field"><div class="label">Value</div><div class="val">${fmt(a.value)}</div></div>
     </div>
     <div class="tabs">
@@ -864,8 +1757,8 @@ function renderAccountWorkspace(){
     </div>
     ${body}
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="backToOverview()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveAndReturn()">Save &amp; return to overview</button>
+      <button class="btn btn-secondary" onclick="cancelAccountWorkspace()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAndContinueTab()">${nextLabel}</button>
     </div>
   `;
 }
@@ -873,32 +1766,37 @@ function renderAccountWorkspace(){
 /* ---------------- RENDER: REVIEW ---------------- */
 function renderReview(){
   const resolved = allResolved();
-  const rows = accounts.map(a=>{
+  const rows = sortedAccounts().map(a=>{
     const s = statusOf(a);
     const flagged = s!=='complete';
-    const excCell = a.exceptions.length
-      ? `<span class="exc-link" onclick="event.stopPropagation();openAccount('${a.id}','exceptions')">${a.exceptions.length} exception${a.exceptions.length>1?'s':''}</span>`
+    const sc = specialCount(a);
+    const excCell = sc>0
+      ? `<span class="exc-link" onclick="event.stopPropagation();openInstructionsPanel('${a.id}')">${sc} instruction${sc>1?'s':''}</span>`
       : '\u2013';
     const planLabel = taxPlanLabel(a);
-    const taxPlanCell = !a.taxable ? '<span style="color:var(--ink-3)">N/A</span>' : (planLabel || '<span style="color:var(--red-text);font-weight:600;">Not set</span>');
-    return `<tr class="clickable" onclick="openAccount('${a.id}')" style="${flagged?'background:#FFFBF2':''}">
-      <td><div class="acct-name">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div><div class="acct-num">${a.type}</div></td>
-      <td><span class="pill ${a.taxable?'taxable':'nontaxable'}">${a.taxable?'Taxable':'Non-taxable'}</span></td>
-      <td>${portfolioName(a.portfolio)}</td>
+    const taxPlanCell = !isTaxable(a) ? '<span style="color:var(--t-secondary)" title="Tax plans apply to taxable accounts only.">Not applicable</span>' : (planLabel || '<span style="color:var(--red-text);font-weight:600;">Not set</span>');
+    return `<tr style="${flagged?'background:var(--warning-tint)':''}">
+      <td><div class="acct-name" onclick="openAccount('${a.id}')">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div><div class="acct-num">${a.type}</div></td>
+      <td><span class="pill ${a.taxStatus}">${taxStatusLabel(a)}</span></td>
+      <td>${portfolioNameWithIcon(a.portfolio)}</td>
       <td>${taxPlanCell}</td>
       <td>${excCell}</td>
-      <td>${flagged? `<span class="fix-link" onclick="event.stopPropagation();openAccount('${a.id}','${!a.portfolio ? 'portfolio' : 'tax'}')">Fix issue</span>` : '\u2013'}</td>
-      <td><span class="status-pill ${s}"><span class="dot"></span>${statusLabel(s)}</span></td>
+      <td>${flagged? `<span class="fix-link" onclick="openAccount('${a.id}','${!a.portfolio ? 'portfolio' : 'tax'}')">Fix issue</span>` : '\u2013'}</td>
+      <td><span class="status-pill ${s}"><span class="dot"></span>${statusLabel(s)}${statusPencil(s, a.id)}</span></td>
     </tr>`;
   }).join('');
 
   return `
     <h1 class="page-title">Proposal Review</h1>
     <p class="page-sub">Verify all configuration metrics. Unresolved items are highlighted below.</p>
-    ${!resolved ? `<div class="banner red">Generation is blocked until every account has a target portfolio and every taxable account has completed tax settings.</div>` : `<div class="banner neutral" style="background:var(--green-bg);color:var(--green-text);border-color:#CDEBD8">All accounts are complete. Tax settings are saved where applicable. Ready to generate trade directives and final documentation.</div>`}
+    ${!resolved ? `<div class="banner red" style="background:var(--danger-tint-canvas)">Generation is blocked until every account has a target portfolio and every taxable account has completed tax settings.</div>` : `<div class="banner neutral" style="background:var(--success-tint-canvas);color:var(--success-tx);border-color:var(--success-d)">All accounts are complete. Tax settings are saved where applicable. Ready to generate trade directives and final documentation.</div>`}
     <div class="table-card">
       <table>
-        <thead><tr><th>Account</th><th>Tax status</th><th>Target portfolio</th><th>Tax plan</th><th>Exceptions</th><th>Issue</th><th>Status</th></tr></thead>
+        <thead><tr><th>Account</th>
+          <th><span class="th-sort" onclick="setSort('taxStatus')">Tax status ${sortArrows('taxStatus')}</span></th>
+          <th>Target portfolio</th><th>Tax plan</th><th>Special instructions</th><th>Issue</th>
+          <th><span class="th-sort" onclick="setSort('status')">Status ${sortArrows('status')}</span></th>
+        </tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
@@ -923,7 +1821,7 @@ function renderSuccess(){
   <div class="success-wrap">
     <div class="success-circle" style="font-size:28px;color:var(--green-text);">&#10003;</div>
     <h1 class="page-title">Proposal Generated Successfully</h1>
-    <p class="page-sub">Henderson Household \u2014 F1P-2026-002301</p>
+    <p class="page-sub">${HOUSEHOLDS[state.selectedHousehold].label} \u2014 F1P-2026-002301</p>
     <div class="success-box">
       <div style="font-weight:700;font-size:12px;letter-spacing:0.02em;color:var(--ink-3);margin-bottom:6px;">ALLOCATION SUMMARY</div>
       <ul>
@@ -947,7 +1845,7 @@ function renderResetConfirm(){
       <p class="sub">This clears every account, portfolio assignment, tax setting, and exception, and returns you to the account-selection screen.</p>
       <div class="btn-row">
         <button class="btn btn-secondary" onclick="cancelReset()">Cancel</button>
-        <button class="btn btn-primary" style="background:#C6392F" onclick="resetPrototype()">Reset prototype</button>
+        <button class="btn btn-primary" style="background:var(--danger-d)" onclick="resetPrototype()">Reset prototype</button>
       </div>
     </div>
   </div>`;
@@ -956,23 +1854,27 @@ function renderResetConfirm(){
 function render(){
   if(state.view==='selectAccounts'){
     const resetOverlay = state.showResetConfirm ? renderResetConfirm() : '';
-    document.getElementById('app').innerHTML = renderSelectAccounts() + (state.toast? `<div class="toast"><b>${state.toast.title}</b>${state.toast.body}</div>` : '') + resetOverlay;
+    document.getElementById('app').innerHTML = renderSidebar() + renderSelectAccounts() + (state.toast? `<div class="toast"><b>${state.toast.title}</b>${state.toast.body}</div>` : '') + resetOverlay + renderPrototypeChip();
     return;
   }
 
   let contentHtml = '';
   if(state.view==='overview') contentHtml = renderOverview();
+  else if(state.view==='bulkPortfolioSelect') contentHtml = renderBulkPortfolioSelect();
+  else if(state.view==='currentPortfolioOverview') contentHtml = renderCurrentPortfolioOverview();
   else if(state.view==='activeAccount') contentHtml = renderAccountWorkspace();
   else if(state.view==='review') contentHtml = renderReview();
   else if(state.view==='success') contentHtml = renderSuccess();
   else if(state.view==='stub') contentHtml = renderStub();
 
   let overlays = '';
-  if(state.showPortfolioModal) overlays += renderPortfolioModal();
   if(state.showMixedWarning) overlays += renderMixedWarning();
   if(state.showConflictWarning) overlays += renderConflictWarning();
   if(state.showResetConfirm) overlays += renderResetConfirm();
+  if(state.detailsOpenId) overlays += renderDetailsPanel();
+  if(state.instructionsPanelAccountId) overlays += renderInstructionsPanel();
   if(state.toast) overlays += `<div class="toast"><b>${state.toast.title}</b>${state.toast.body}</div>`;
+  overlays += renderPrototypeChip();
 
   document.getElementById('app').innerHTML = `
     ${renderSidebar()}

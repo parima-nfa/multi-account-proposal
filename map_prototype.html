@@ -231,6 +231,25 @@
   tbody tr.clickable:hover { background: var(--tn-bg); cursor:pointer; }
   .acct-name { font-weight:600; color: var(--ink); }
   .acct-name:hover { color: var(--t-link); text-decoration: underline; text-underline-offset: 3px; cursor:pointer; }
+  .nav-account-row.hover-link { background: var(--tn-bg); }
+  .nav-account-row.hover-link .name { color: var(--tn-lbl); }
+  .content .acct-header { flex-wrap:wrap; gap:14px 34px; }
+  .notes-input { width:100%; min-height:84px; border:1px solid var(--b-default); border-radius:6px; padding:8px 10px; font:inherit; font-size:13px; color: var(--ink); background: var(--surface); resize:vertical; }
+  .notes-input:focus { outline:none; border-color: var(--b-focus); box-shadow: 0 0 0 1px var(--b-focus); }
+  .tax-menu { position:fixed; z-index:60; width:210px; background: var(--surface); border:1px solid var(--border-strong); border-radius:8px; box-shadow: var(--shadow); padding:6px; }
+  .tax-menu-head { padding:6px 10px 8px; font-size:11.5px; color: var(--t-secondary); border-bottom:1px solid var(--border); margin-bottom:4px; }
+  .tax-menu-head b { color: var(--ink); }
+  .tax-menu-head span { display:block; font-size:10.5px; margin-top:1px; }
+  .tax-opt { position:relative; display:flex; justify-content:space-between; padding:9px 10px; border-radius:6px; font-size:13px; color: var(--ink); cursor:pointer; }
+  .tax-opt:hover { background: var(--tn-hover); color: var(--tn-hover-lbl); }
+  .tax-opt.sel { font-weight:700; color: var(--tn-lbl); }
+  .tax-preview { display:none; position:absolute; top:-6px; left:calc(100% + 14px); width:290px; background: var(--surface); border:1px solid var(--border-strong); border-radius:10px; box-shadow: var(--shadow); padding:14px 16px; cursor:default; color: var(--ink); font-weight:400; }
+  .tax-menu.flip .tax-preview { left:auto; right:calc(100% + 14px); }
+  .tax-opt:hover .tax-preview { display:block; }
+  .tax-preview h5 { margin:0 0 10px; font-size:14px; color: var(--tn-lbl); }
+  .tax-preview-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; }
+  .tp-k { font-size:11px; color: var(--t-secondary); }
+  .tp-v { font-size:14px; font-weight:700; color: var(--ink); margin-top:2px; }
   .acct-num { font-size:11.5px; color: var(--ink-3); margin-top:1px; }
 
   /* custom checkbox */
@@ -383,11 +402,15 @@
   .progress-fill { height:100%; background: var(--brand); border-radius:2px; }
 
   /* Split-ratio bar icon on portfolio cards (item 13) */
-  .split-bar-wrap { display:flex; align-items:center; gap:7px; flex-shrink:0; }
-  .split-bar { display:flex; width:40px; height:6px; border-radius:3px; overflow:hidden; gap:1px; }
-  .split-bar .eq { background: var(--brand); }
-  .split-bar .fx { background: var(--brand-subtle); }
-  .split-label { font-size:11.5px; color: var(--t-secondary); white-space:nowrap; }
+  .split-ring {
+    width:44px; height:44px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .split-ring-inner {
+    width:32px; height:32px; border-radius:50%; background: var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    font-size:10.5px; font-weight:700; color: var(--ink); text-align:center; line-height:1;
+  }
 
   /* Prototype chip (item 18) */
   .prototype-chip {
@@ -598,7 +621,7 @@ const HOUSEHOLDS = {
 function freshAccountTemplate(householdKey){
   const key = householdKey || 'henderson';
   const base = JSON.parse(JSON.stringify(HOUSEHOLDS[key].accounts));
-  return base.map(a => Object.assign(a, { portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[] }));
+  return base.map(a => Object.assign(a, { portfolio:null, source:null, taxSetting:null, taxCustomAmt:'', restrictions:{ fossil:false }, exceptions:[], notes:'', ytdGains: a.taxStatus==='taxable' ? Math.round(a.value*0.0135/10)*10 : 0 }));
 }
 
 function mkPortfolio(idPrefix, catLabel, catKey, split, desc, ret, risk, aum, acctCount){
@@ -719,13 +742,15 @@ function defaultState(){
     proposalGenerated: false,
     reviewValidationBanner: false,
     showPrototypeMenu: false,
+    taxMenu: null,
     selectAccountsError: false,
   };
 }
 let state = defaultState();
 
 /* ---------------- HELPERS ---------------- */
-function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
+function fmt(n){ const r = Math.round(n); return (r<0?'-':'') + '$' + Math.abs(r).toLocaleString('en-US'); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function getAccount(id){ return accounts.find(a=>a.id===id); }
 
 function isTaxable(a){ return a.taxStatus==='taxable'; }
@@ -736,13 +761,16 @@ function statusOf(a){
   return 'complete';
 }
 function statusLabel(s){
-  return { not_started:'Not started', tax_review:'Needs review', complete:'Complete' }[s];
+  return { not_started:'Not started', tax_review:'Tax plan needed', complete:'Complete' }[s];
 }
 function sideTagLabel(s){
-  return { not_started:'Not started', tax_review:'Needs review', complete:'Complete' }[s];
+  return { not_started:'Not started', tax_review:'Tax plan', complete:'Complete' }[s];
+}
+function statusHint(s){
+  return { not_started:'No portfolio assigned yet.', tax_review:'Portfolio assigned. Choose a tax transition plan to complete this account.', complete:'' }[s] || '';
 }
 function statusPencil(s, id){
-  return s==='tax_review' ? ` <span class="icon-btn" title="Review tax plan" onclick="event.stopPropagation();openAccount('${id}','tax')" style="padding:1px 3px;">\u270E</span>` : '';
+  return s==='tax_review' ? ` <span class="icon-btn" title="Set tax plan" onclick="event.stopPropagation();openAccount('${id}','tax')" style="padding:1px 3px;">\u270E</span>` : '';
 }
 function taxPlanLabel(a){
   if(!isTaxable(a)) return '\u2013';
@@ -880,6 +908,14 @@ function renderPrototypeChip(){
 }
 
 /* ---------------- SELECT ACCOUNTS (initial) ---------------- */
+function toggleSelectAllSetup(){
+  if(!state.selectedHousehold) return;
+  const ids = HOUSEHOLDS[state.selectedHousehold].accounts.map(a=>a.id);
+  const allOn = ids.every(id => state.selectAccountsChecked[id]);
+  ids.forEach(id => state.selectAccountsChecked[id] = !allOn);
+  state.selectAccountsError = false;
+  render();
+}
 function toggleSelectAccountsChecked(id){
   state.selectAccountsChecked[id] = !state.selectAccountsChecked[id];
   state.selectAccountsError = false;
@@ -903,7 +939,7 @@ function continueFromSelectAccounts(){
   }
   state.selectAccountsError = false;
   accounts = chosen;
-  state.view = 'overview';
+  state.view = 'currentPortfolioOverview';
   render();
 }
 
@@ -951,8 +987,8 @@ function attemptApplyBulk(){
   }
   state.portfolioSelectError = false;
   const selected = state.selectedIds.map(getAccount);
-  const distinctStatuses = new Set(selected.map(a=>a.taxStatus));
-  if(distinctStatuses.size > 1){
+  const nTaxable = selected.filter(a=>a.taxStatus==='taxable').length;
+  if(nTaxable > 0 && nTaxable < selected.length){ // warn only when taxable and non-taxable accounts are mixed
     state.showMixedWarning = true;
     render();
   } else {
@@ -981,10 +1017,58 @@ function openPortfolioDetails(id){ state.detailsOpenId = id; state.instructionsP
 function closePortfolioDetails(){ state.detailsOpenId = null; render(); }
 function openInstructionsPanel(id){ state.instructionsPanelAccountId = id; state.detailsOpenId = null; render(); }
 function closeInstructionsPanel(){ state.instructionsPanelAccountId = null; render(); }
+function setNotes(id, val){ const a = getAccount(id); if(a) a.notes = val; }
+function openTaxMenu(ev, id){
+  ev.stopPropagation();
+  const r = ev.currentTarget.getBoundingClientRect();
+  const flip = r.left + 210 + 12 + 290 > window.innerWidth - 16;
+  const y = (r.bottom + 240 > window.innerHeight) ? Math.max(8, r.top - 240) : r.bottom + 4;
+  state.taxMenu = { id, x:r.left, y, flip };
+  render();
+}
+function chooseTaxPlan(id, opt){
+  const a = getAccount(id);
+  state.taxMenu = null;
+  if(opt==='custom'){
+    openAccount(id,'tax');
+    getAccount(id).taxSetting = 'custom';
+    render();
+    return;
+  }
+  a.taxSetting = opt;
+  showToast('Tax plan set', a.name + ' \u2014 ' + taxPlanLabel(a) + '.');
+}
+function renderTaxMenu(){
+  const m = state.taxMenu;
+  if(!m) return '';
+  const a = getAccount(m.id);
+  if(!a) return '';
+  const opts = [['minimal','Minimal gains'],['median','Median gains'],['max','Max gains'],['custom','Custom\u2026']];
+  const items = opts.map(([id,label])=>{
+    let prev;
+    if(id==='custom'){
+      prev = `<div class="tax-preview"><h5>Custom</h5><div style="font-size:12.5px;color:var(--t-secondary);line-height:1.5;">Set your own maximum realized gain. Opens this account's tax transition plan so you can enter an amount.</div></div>`;
+    } else {
+      const f = taxFiguresFor(a, id, '');
+      prev = `<div class="tax-preview"><h5>${label}</h5><div class="tax-preview-grid">
+        <div><div class="tp-k">Tax Liability</div><div class="tp-v">${fmt(f.taxLiab)}</div></div>
+        <div><div class="tp-k">Tracking Error</div><div class="tp-v">${f.trackingError}</div></div>
+        <div><div class="tp-k">Portfolio Traded</div><div class="tp-v">${f.pctTraded}</div></div>
+        <div><div class="tp-k">Completion</div><div class="tp-v">${f.completion}</div></div>
+      </div></div>`;
+    }
+    return `<div class="tax-opt ${a.taxSetting===id?'sel':''}" onclick="chooseTaxPlan('${a.id}','${id}')"><span>${label}</span>${a.taxSetting===id?'<span>\u2713</span>':''}${prev}</div>`;
+  }).join('');
+  return `<div class="tax-menu ${m.flip?'flip':''}" style="left:${m.x}px;top:${m.y}px;">
+    <div class="tax-menu-head">YTD realized gains <b>${fmt(a.ytdGains)}</b> <span>Sample data</span></div>
+    ${items}
+  </div>`;
+}
 
 function tabOrderFor(a){
-  const order = ['current','portfolio','exceptions'];
+  const order = ['current','portfolio'];
   if(isTaxable(a)) order.push('tax');
+  order.push('exceptions');
   order.push('history');
   return order;
 }
@@ -1083,9 +1167,10 @@ function generateProposal(){
 function openStub(label){ state.stubLabel = label; state.view='stub'; render(); }
 
 /* tax figures: simplified deterministic calc so numbers change per option */
-function taxFigures(a){
+function taxFigures(a){ return taxFiguresFor(a, a.taxSetting, a.taxCustomAmt); }
+function taxFiguresFor(a, opt, customAmt){
   const base = a.value;
-  const mult = { minimal:0.35, median:0.62, max:0.94, custom: a.taxCustomAmt ? Math.min(1, (parseFloat(a.taxCustomAmt)||0)/ (base*0.03)) : 0.5 }[a.taxSetting] || 0.5;
+  const mult = { minimal:0.35, median:0.62, max:0.94, custom: customAmt ? Math.min(1, (parseFloat(customAmt)||0)/ (base*0.03)) : 0.5 }[opt] || 0.5;
   const shortTerm = -(base*0.0107*mult);
   const longTerm = -(base*0.00047*mult);
   const realized = shortTerm+longTerm;
@@ -1096,7 +1181,8 @@ function taxFigures(a){
     pctTraded: (40+mult*45).toFixed(2)+'%',
     pctInModel: (60+mult*38).toFixed(2)+'%',
     trackingError: (2.1 - mult*1.3).toFixed(2)+'%',
-    years: mult>0.8 ? '~2-3 years' : mult>0.5 ? '~1-2 years' : '~6-12 months',
+    years: mult>0.8 ? '~1 year' : mult>0.5 ? '~2-3 years' : '~3+ years',
+    completion: mult>0.8 ? '~1 year' : mult>0.5 ? '~2-3 years' : 'Slow transition',
   };
 }
 
@@ -1147,7 +1233,13 @@ function renderSelectAccounts(){
       </div>
 
       ${hasHousehold ? `
-        <div style="font-weight:700; font-size:13.5px; margin:22px 0 10px;">Select accounts</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px;">
+          <div style="font-weight:700; font-size:13.5px;">Select accounts</div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--t-secondary);" onclick="toggleSelectAllSetup()">
+            <div class="chk ${nChecked===master.length?'checked':(nChecked>0?'indeterminate':'')}" tabindex="0" role="checkbox" aria-checked="${nChecked===master.length?'true':(nChecked>0?'mixed':'false')}" aria-label="Select all accounts"></div>
+            Select all
+          </label>
+        </div>
         ${cards}
         <div style="font-size:13px;color:var(--t-secondary);margin-top:10px;">
           <span style="color:var(--t-primary);font-weight:600;">${nChecked} of ${master.length} accounts selected</span> \u00b7 <span style="color:var(--t-primary);font-weight:600;">${fmt(checkedSum)}</span>
@@ -1156,7 +1248,7 @@ function renderSelectAccounts(){
       ` : `<div class="stub-box" style="margin-top:10px;">Select a household above to see its accounts.</div>`}
 
       <div class="btn-row">
-        <button class="btn btn-primary" onclick="continueFromSelectAccounts()">Continue to Configure Accounts</button>
+        <button class="btn btn-primary" onclick="continueFromSelectAccounts()">Continue to Current Portfolio Overview</button>
       </div>
     </div>
   </div>`;
@@ -1236,9 +1328,9 @@ function renderSidebarStep(step){
     const accRows = visibleAccounts.map(a=>{
       const s = statusOf(a);
       const isActive = state.view==='activeAccount' && state.activeAccountId===a.id;
-      return `<div class="nav-account-row ${isActive?'active-acct':''}" onclick="openAccount('${a.id}')">
+      return `<div class="nav-account-row ${isActive?'active-acct':''}" data-acct="${a.id}" onclick="openAccount('${a.id}')">
         <div class="name-wrap"><span class="name">${a.name} <span class="num-inline">(${a.num})</span></span></div>
-        <span class="side-tag ${s}">${sideTagLabel(s)}${statusPencil(s, a.id)}</span>
+        <span class="side-tag ${s}" title="${statusHint(s)||sideTagLabel(s)}">${sideTagLabel(s)}${statusPencil(s, a.id)}</span>
       </div>`;
     }).join('');
     const showAllToggle = accounts.length > TRUNCATE_AT
@@ -1370,22 +1462,24 @@ function renderOverview(){
     const s = statusOf(a);
     const checked = state.selectedIds.includes(a.id);
     const sc = specialCount(a);
+    const hasNote = !!(a.notes && a.notes.trim());
     const excCell = sc>0
       ? `<span class="exc-link" onclick="event.stopPropagation();openInstructionsPanel('${a.id}')">${sc} instruction${sc>1?'s':''}</span>`
-      : `<span class="add-link" onclick="event.stopPropagation();openInstructionsPanel('${a.id}')">+ Add</span>`;
+      : hasNote
+        ? `<span class="exc-link" onclick="event.stopPropagation();openInstructionsPanel('${a.id}')">Note added</span>`
+        : `<span class="add-link" onclick="event.stopPropagation();openInstructionsPanel('${a.id}')">+ Add</span>`;
     const planLabel = taxPlanLabel(a);
     const taxPlanCell = !isTaxable(a) ? '<span style="color:var(--t-secondary)" title="Tax plans apply to taxable accounts only.">Not applicable</span>'
-      : planLabel ? planLabel
-      : `<span class="add-link" onclick="event.stopPropagation();openAccount('${a.id}','tax')">+ Add</span>`;
+      : `<span class="add-link" onclick="openTaxMenu(event,'${a.id}')">${planLabel ? planLabel+' \u25BE' : '+ Add'}</span>`;
     return `<tr>
       <td onclick="event.stopPropagation()"><div class="chk ${checked?'checked':''}" onclick="toggleSelect('${a.id}')"></div></td>
-      <td><div class="acct-name" onclick="openAccount('${a.id}')">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div><div class="acct-num">${a.type}</div></td>
+      <td><div class="acct-name" data-acct="${a.id}" onclick="openAccount('${a.id}')">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div><div class="acct-num">${a.type}</div></td>
       <td><span class="pill ${a.taxStatus}">${taxStatusLabel(a)}</span></td>
       <td>${fmt(a.value)}</td>
       <td>${portfolioNameWithIcon(a.portfolio)}</td>
       <td>${taxPlanCell}</td>
+      <td><span class="status-pill ${s}" title="${statusHint(s)}"><span class="dot"></span>${statusLabel(s)}${statusPencil(s, a.id)}</span></td>
       <td>${excCell}</td>
-      <td><span class="status-pill ${s}"><span class="dot"></span>${statusLabel(s)}${statusPencil(s, a.id)}</span></td>
     </tr>`;
   }).join('');
 
@@ -1398,7 +1492,9 @@ function renderOverview(){
   const validationBanner = (state.reviewValidationBanner && incomplete.length>0) ? `
     <div class="banner red" id="review-validation-banner" role="alert" tabindex="-1">
       <div><b>${incomplete.length} account${incomplete.length>1?'s':''} still need${incomplete.length>1?'':'s'} configuration before review.</b>
-        <div style="margin-top:6px;">${incomplete.map(a=>`<span class="fix-link" style="margin-right:14px;" onclick="openAccount('${a.id}')">Configure ${a.name}</span>`).join('')}</div>
+        <div style="margin-top:6px;">${incomplete.map(a=>statusOf(a)==='tax_review'
+          ? `<span class="fix-link" style="margin-right:14px;" onclick="openAccount('${a.id}','tax')">Set tax plan for ${a.name}</span>`
+          : `<span class="fix-link" style="margin-right:14px;" onclick="openAccount('${a.id}','portfolio')">Assign a portfolio to ${a.name}</span>`).join('')}</div>
       </div>
     </div>` : '';
 
@@ -1419,8 +1515,9 @@ function renderOverview(){
           <th>Account</th>
           <th><span class="th-sort" onclick="setSort('taxStatus')">Tax status ${sortArrows('taxStatus')}</span></th>
           <th><span class="th-sort" onclick="setSort('value')">Account value ${sortArrows('value')}</span></th>
-          <th>Target portfolio</th><th>Tax plan</th><th>Special instructions</th>
+          <th>Target portfolio</th><th>Tax plan</th>
           <th><span class="th-sort" onclick="setSort('status')">Status ${sortArrows('status')}</span></th>
+          <th>Special instructions</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -1455,9 +1552,11 @@ function categoryIconBadge(category, inline){
 function renderSplitBar(p){
   if(!p.split || p.split.indexOf('/')===-1) return '';
   const [eq, fx] = p.split.split('/').map(Number);
-  return `<div class="split-bar-wrap">
-    <div class="split-bar"><div class="eq" style="width:${eq}%"></div><div class="fx" style="width:${fx}%"></div></div>
-    <span class="split-label">${p.split}</span>
+  const gradient = eq>=100
+    ? `var(--brand)`
+    : (eq<=0 ? `var(--brand-subtle)` : `conic-gradient(var(--brand) 0% ${eq}%, var(--brand-subtle) ${eq}% 100%)`);
+  return `<div class="split-ring" style="background:${gradient};">
+    <div class="split-ring-inner">${p.split}</div>
   </div>`;
 }
 function renderPortfolioCard(p, isSelected, onSelectAttr){
@@ -1541,7 +1640,10 @@ function renderInstructionsPanel(){
       <div class="dp-section-title">Added for this proposal</div>
       <div class="dp-card">${exceptionRows || '<div class="empty-note">None added.</div>'}</div>
 
-      <div class="details-link" onclick="closeInstructionsPanel();openAccount('${a.id}','exceptions')">Manage special instructions \u2192</div>
+      <div class="dp-section-title">Notes</div>
+      <textarea class="notes-input" placeholder="Add a note about this account\u2026" oninput="setNotes('${a.id}', this.value)">${esc(a.notes||'')}</textarea>
+
+      <div class="details-link" style="margin-top:14px;" onclick="closeInstructionsPanel();openAccount('${a.id}','exceptions')">Manage special instructions \u2192</div>
     </div>
   </div>`;
 }
@@ -1593,22 +1695,25 @@ function renderMixedWarning(){
   const taxableAccts = selected.filter(a=>a.taxStatus==='taxable');
   const deferredAccts = selected.filter(a=>a.taxStatus==='deferred');
   const freeAccts = selected.filter(a=>a.taxStatus==='free');
-  const groups = [['Taxable', taxableAccts], ['Tax-Deferred', deferredAccts], ['Tax-Free', freeAccts]].filter(([,list])=>list.length>0);
+  const groups = [['Taxable', taxableAccts, true], ['Tax-Deferred', deferredAccts, false], ['Tax-Free', freeAccts, false]].filter(([,list])=>list.length>0);
+  const n = taxableAccts.length;
+  const row = (a, needs) => needs
+    ? `<div style="padding:6px 0;"><div style="font-size:13px;font-weight:600;"><span style="color:var(--warning-tx);">\u26A0</span> ${a.name} \u2014 ${a.num}</div><div style="font-size:12px;color:var(--warning-tx);margin-top:1px;">Tax settings review required</div></div>`
+    : `<div style="padding:6px 0;"><div style="font-size:13px;font-weight:600;">${a.name} \u2014 ${a.num}</div><div style="font-size:12px;color:var(--t-secondary);margin-top:1px;">No additional tax settings required</div></div>`;
   return `
   <div class="modal-overlay">
     <div class="modal" style="max-width:520px">
       <h2>Mixed tax status warning</h2>
-      <p class="sub">You're applying the same portfolio to accounts with different tax statuses.</p>
-      <div class="banner amber">
-        <div><b>${taxableAccts.length} of ${selected.length}</b> selected accounts are taxable and will still need individual tax settings reviewed after this is applied. Tax-deferred and tax-free accounts require no further tax action.</div>
+      <div class="banner amber" style="margin-top:12px;">
+        <div><b>${n} account${n===1?'':'s'} will require tax settings review after this portfolio is assigned.</b><br>You can apply the portfolio now and complete the tax settings afterward.</div>
       </div>
-      ${groups.map(([label,list])=>`
-        <div style="margin:12px 0 6px;font-weight:600;font-size:12.5px;">${label}</div>
-        ${list.map(a=>`<div style="font-size:13px;padding:4px 0;">${a.name} \u2014 ${a.num}</div>`).join('')}
+      ${groups.map(([label,list,needs])=>`
+        <div style="margin:14px 0 4px;font-weight:700;font-size:12.5px;color:var(--t-secondary);">${label}</div>
+        ${list.map(a=>row(a, needs)).join('')}
       `).join('')}
       <div class="btn-row">
-        <button class="btn btn-secondary" onclick="cancelMixedWarning()">Go back and adjust selection</button>
-        <button class="btn btn-primary" onclick="finalizeBulkApply()">Proceed</button>
+        <button class="btn btn-secondary" onclick="cancelMixedWarning()">Adjust selection</button>
+        <button class="btn btn-primary" onclick="finalizeBulkApply()">Apply portfolio</button>
       </div>
     </div>
   </div>`;
@@ -1638,17 +1743,21 @@ function renderConflictWarning(){
 /* ---------------- RENDER: ACCOUNT WORKSPACE ---------------- */
 function renderAccountWorkspace(){
   const a = getAccount(state.activeAccountId);
-  let tabs = [['current','Current Portfolio'],['portfolio','Portfolio Selection'],['exceptions','Special Instructions']];
-  if(isTaxable(a)) tabs.push(['tax','Tax Settings']);
+  let tabs = [['current','Current Portfolio'],['portfolio','Portfolio Selection']];
+  if(isTaxable(a)) tabs.push(['tax','Tax Transition Plan']);
+  tabs.push(['exceptions','Special Instructions']);
   tabs.push(['history','History']);
 
   let body = '';
   if(state.activeTab==='current'){
-    body = `<div class="table-card" style="padding:20px;">
-      <div style="display:flex;gap:40px;">
-        <div><div class="tf-label">Total value</div><div class="tf-value" style="font-size:18px">${fmt(a.value)}</div></div>
-        <div><div class="tf-label">Current model</div><div class="tf-value">Tax-Sensitive ETF 20/80</div></div>
+    body = `<div class="table-card" style="padding:18px 20px;">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px;">Asset allocation</div>
+      ${renderAllocBar(a.allocation)}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 4px;">
+        <span style="font-weight:700;font-size:13px;">Top holdings</span>
+        <span style="font-size:11px;color:var(--t-secondary);">Sample data</span>
       </div>
+      ${renderHoldingsTable(a.holdings)}
     </div>`;
   } else if(state.activeTab==='portfolio'){
     const bannerHtml = (a.portfolio && a.source==='bulk')
@@ -1714,16 +1823,24 @@ function renderAccountWorkspace(){
       </select>
       <input type="text" placeholder="${state.excFormType==='no_trade'?'Ticker or security name':state.excFormType==='reserve'?'Amount, e.g. 5000':'Describe the instruction'}" value="${state.excFormValue}" oninput="state.excFormValue=this.value">
       <button class="btn btn-secondary" onclick="addException()">Add exception</button>
-    </div>`;
+    </div>
+
+    <div class="si-section-title" style="margin-top:22px;">Notes</div>
+    <p class="si-sub">Free-form context for this account. Also shown in the instructions panel on the overview.</p>
+    <textarea class="notes-input" placeholder="Add a note about this account\u2026" oninput="setNotes('${a.id}', this.value)">${esc(a.notes||'')}</textarea>`;
   } else if(state.activeTab==='tax'){
     const opts = [['minimal','Minimal gains'],['median','Median gains'],['max','Max gains'],['custom','Custom']];
     const optsHtml = opts.map(([id,label])=>{
       const checked = a.taxSetting===id;
-      const customField = id==='custom' && checked ? `<div class="custom-input"><span>$</span><input type="text" placeholder="Enter amount" value="${a.taxCustomAmt}" oninput="setCustomAmt(this.value)"></div>` : '';
+      const customField = id==='custom' && checked ? `<div class="custom-input"><span>$</span><input type="text" data-keep="customAmt" placeholder="Enter amount" value="${a.taxCustomAmt}" oninput="setCustomAmt(this.value)"></div>` : '';
       return `<div class="radio-line ${checked?'checked':''}" onclick="setTaxSetting('${id}')"><div class="radio-circle"></div><div class="rl-label">${label}</div></div>${customField}`;
     }).join('');
     const fig = a.taxSetting ? taxFigures(a) : null;
-    body = `<div class="table-card" style="padding:6px 18px;">${optsHtml}</div>
+    body = `<div class="table-card" style="padding:14px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
+      <div><div class="tf-label">YTD realized gains</div><div class="tf-value" style="font-size:18px;">${fmt(a.ytdGains)}</div></div>
+      <span style="font-size:11px;color:var(--t-secondary);">Sample data</span>
+    </div>
+    <div class="table-card" style="padding:6px 18px;">${optsHtml}</div>
     ${fig ? `<div class="tax-panel">
       <h4>Realized gain and tax</h4>
       <div class="tax-row"><span class="k">Short term gain</span><span class="v">${fmt(fig.shortTerm)}</span></div>
@@ -1741,7 +1858,7 @@ function renderAccountWorkspace(){
 
   const order = tabOrderFor(a);
   const isLastTab = order.indexOf(state.activeTab) === order.length-1;
-  const tabLabels = { current:'Current Portfolio', portfolio:'Portfolio Selection', exceptions:'Special Instructions', tax:'Tax Settings', history:'History' };
+  const tabLabels = { current:'Current Portfolio', portfolio:'Portfolio Selection', exceptions:'Special Instructions', tax:'Tax Transition Plan', history:'History' };
   const nextLabel = isLastTab ? 'Save &amp; return to overview' : 'Save &amp; continue to ' + tabLabels[order[order.indexOf(state.activeTab)+1]];
 
   return `
@@ -1751,6 +1868,8 @@ function renderAccountWorkspace(){
       <div class="field"><div class="label">Account #</div><div class="val">${a.num}</div></div>
       <div class="field"><div class="label">Tax status</div><div class="val">${taxStatusLabel(a)}</div></div>
       <div class="field"><div class="label">Value</div><div class="val">${fmt(a.value)}</div></div>
+      <div class="field"><div class="label">Current model</div><div class="val">Tax-Sensitive ETF 20/80</div></div>
+      <div class="field"><div class="label">Proposed model</div><div class="val">${a.portfolio ? portfolioName(a.portfolio) : '\u2014'}</div></div>
     </div>
     <div class="tabs">
       ${tabs.map(([id,label])=>`<div class="tab ${state.activeTab===id?'active':''}" onclick="state.activeTab='${id}';render()">${label}</div>`).join('')}
@@ -1770,32 +1889,34 @@ function renderReview(){
     const s = statusOf(a);
     const flagged = s!=='complete';
     const sc = specialCount(a);
+    const hasNote = !!(a.notes && a.notes.trim());
     const excCell = sc>0
       ? `<span class="exc-link" onclick="event.stopPropagation();openInstructionsPanel('${a.id}')">${sc} instruction${sc>1?'s':''}</span>`
-      : '\u2013';
+      : hasNote ? `<span class="exc-link" onclick="event.stopPropagation();openInstructionsPanel('${a.id}')">Note added</span>` : '\u2013';
     const planLabel = taxPlanLabel(a);
     const taxPlanCell = !isTaxable(a) ? '<span style="color:var(--t-secondary)" title="Tax plans apply to taxable accounts only.">Not applicable</span>' : (planLabel || '<span style="color:var(--red-text);font-weight:600;">Not set</span>');
     return `<tr style="${flagged?'background:var(--warning-tint)':''}">
-      <td><div class="acct-name" onclick="openAccount('${a.id}')">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div><div class="acct-num">${a.type}</div></td>
+      <td><div class="acct-name" data-acct="${a.id}" onclick="openAccount('${a.id}')">${a.name} <span style="color:var(--ink-3);font-weight:500;">(${a.num})</span></div><div class="acct-num">${a.type}</div></td>
       <td><span class="pill ${a.taxStatus}">${taxStatusLabel(a)}</span></td>
       <td>${portfolioNameWithIcon(a.portfolio)}</td>
       <td>${taxPlanCell}</td>
+      <td>${flagged? `<span class="fix-link" onclick="openAccount('${a.id}','${!a.portfolio ? 'portfolio' : 'tax'}')">${!a.portfolio ? 'Assign portfolio' : 'Set tax plan'}</span>` : '\u2013'}</td>
+      <td><span class="status-pill ${s}" title="${statusHint(s)}"><span class="dot"></span>${statusLabel(s)}${statusPencil(s, a.id)}</span></td>
       <td>${excCell}</td>
-      <td>${flagged? `<span class="fix-link" onclick="openAccount('${a.id}','${!a.portfolio ? 'portfolio' : 'tax'}')">Fix issue</span>` : '\u2013'}</td>
-      <td><span class="status-pill ${s}"><span class="dot"></span>${statusLabel(s)}${statusPencil(s, a.id)}</span></td>
     </tr>`;
   }).join('');
 
   return `
     <h1 class="page-title">Proposal Review</h1>
     <p class="page-sub">Verify all configuration metrics. Unresolved items are highlighted below.</p>
-    ${!resolved ? `<div class="banner red" style="background:var(--danger-tint-canvas)">Generation is blocked until every account has a target portfolio and every taxable account has completed tax settings.</div>` : `<div class="banner neutral" style="background:var(--success-tint-canvas);color:var(--success-tx);border-color:var(--success-d)">All accounts are complete. Tax settings are saved where applicable. Ready to generate trade directives and final documentation.</div>`}
+    ${!resolved ? `<div class="banner red" style="background:var(--danger-tint-canvas)">Generation is blocked until every account has a target portfolio and every taxable account has a tax plan.</div>` : `<div class="banner neutral" style="background:var(--success-tint-canvas);color:var(--success-tx);border-color:var(--success-d)">All accounts are complete. Tax settings are saved where applicable. Ready to generate trade directives and final documentation.</div>`}
     <div class="table-card">
       <table>
         <thead><tr><th>Account</th>
           <th><span class="th-sort" onclick="setSort('taxStatus')">Tax status ${sortArrows('taxStatus')}</span></th>
-          <th>Target portfolio</th><th>Tax plan</th><th>Special instructions</th><th>Issue</th>
+          <th>Target portfolio</th><th>Tax plan</th><th>Issue</th>
           <th><span class="th-sort" onclick="setSort('status')">Status ${sortArrows('status')}</span></th>
+          <th>Special instructions</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -1851,7 +1972,7 @@ function renderResetConfirm(){
   </div>`;
 }
 
-function render(){
+function renderInner(){
   if(state.view==='selectAccounts'){
     const resetOverlay = state.showResetConfirm ? renderResetConfirm() : '';
     document.getElementById('app').innerHTML = renderSidebar() + renderSelectAccounts() + (state.toast? `<div class="toast"><b>${state.toast.title}</b>${state.toast.body}</div>` : '') + resetOverlay + renderPrototypeChip();
@@ -1873,6 +1994,7 @@ function render(){
   if(state.showResetConfirm) overlays += renderResetConfirm();
   if(state.detailsOpenId) overlays += renderDetailsPanel();
   if(state.instructionsPanelAccountId) overlays += renderInstructionsPanel();
+  if(state.taxMenu) overlays += renderTaxMenu();
   if(state.toast) overlays += `<div class="toast"><b>${state.toast.title}</b>${state.toast.body}</div>`;
   overlays += renderPrototypeChip();
 
@@ -1885,6 +2007,46 @@ function render(){
     ${overlays}
   `;
 }
+
+function render(){
+  const ae = document.activeElement;
+  const keepKey = (ae && ae.dataset) ? ae.dataset.keep : null;
+  const pos = (keepKey && typeof ae.selectionStart==='number') ? ae.selectionStart : null;
+  renderInner();
+  if(keepKey){
+    const el = document.querySelector('[data-keep="'+keepKey+'"]');
+    if(el){ el.focus(); if(pos!==null && el.setSelectionRange){ try{ el.setSelectionRange(pos,pos); }catch(e){} } }
+  }
+}
+
+/* hover an account name in the table -> highlight the same account in the sidebar */
+document.addEventListener('mouseover', function(e){
+  const t = e.target && e.target.closest ? e.target.closest('.acct-name[data-acct]') : null;
+  if(!t) return;
+  const row = document.querySelector('.nav-account-row[data-acct="'+t.dataset.acct+'"]');
+  if(row) row.classList.add('hover-link');
+});
+document.addEventListener('mouseout', function(e){
+  const t = e.target && e.target.closest ? e.target.closest('.acct-name[data-acct]') : null;
+  if(!t) return;
+  document.querySelectorAll('.nav-account-row.hover-link').forEach(function(r){ r.classList.remove('hover-link'); });
+});
+/* click outside closes the right-side panels and the tax plan menu */
+document.addEventListener('click', function(e){
+  const t = e.target;
+  if(!(t instanceof Element)) return;
+  let changed = false;
+  if((state.detailsOpenId || state.instructionsPanelAccountId) && !t.closest('.details-panel')){
+    state.detailsOpenId = null; state.instructionsPanelAccountId = null; changed = true;
+  }
+  if(state.taxMenu && !t.closest('.tax-menu')){ state.taxMenu = null; changed = true; }
+  if(changed) setTimeout(render, 0);
+}, true);
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape' && (state.detailsOpenId || state.instructionsPanelAccountId || state.taxMenu)){
+    state.detailsOpenId = null; state.instructionsPanelAccountId = null; state.taxMenu = null; render();
+  }
+});
 
 render();
 </script>
